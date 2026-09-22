@@ -81,4 +81,57 @@
       openProduct();
     });
   });
+
+  document.querySelectorAll(".bb-feedback-track").forEach((track) => {
+    const firstSequence = track.querySelector(".bb-feedback-sequence");
+    if (!firstSequence) return;
+
+    let sequenceWidth = firstSequence.scrollWidth;
+    if (!sequenceWidth) return;
+
+    const movesRight = track.classList.contains("bb-feedback-track-right");
+    let progress = movesRight ? sequenceWidth : 0;
+    let previousTime = null;
+    let paused = false;
+    const speed = 28 / 1000;
+
+    if ("ResizeObserver" in window) {
+      const resizeObserver = new ResizeObserver(() => {
+        sequenceWidth = firstSequence.scrollWidth;
+        progress = movesRight ? sequenceWidth : 0;
+      });
+      resizeObserver.observe(firstSequence);
+    }
+
+    track.addEventListener("mouseenter", () => {
+      paused = true;
+    });
+
+    track.addEventListener("mouseleave", () => {
+      paused = false;
+      previousTime = null;
+    });
+
+    const animate = (time) => {
+      if (previousTime === null) previousTime = time;
+      const delta = time - previousTime;
+      previousTime = time;
+
+      if (!paused && sequenceWidth > 0) {
+        progress = movesRight
+          ? progress - (delta * speed)
+          : progress + (delta * speed);
+
+        if (progress >= sequenceWidth) progress = 0;
+        if (progress <= 0) progress = sequenceWidth;
+
+        const offset = movesRight ? -progress : -progress;
+        track.style.transform = `translate3d(${offset}px, 0, 0)`;
+      }
+
+      window.requestAnimationFrame(animate);
+    };
+
+    window.requestAnimationFrame(animate);
+  });
 })();

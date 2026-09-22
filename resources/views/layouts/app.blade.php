@@ -1109,7 +1109,6 @@
             will-change: transform;
             transform: translate3d(0, 0, 0);
             backface-visibility: hidden;
-            animation-delay: 0s;
         }
 
         .bb-feedback-sequence {
@@ -1121,16 +1120,10 @@
 
         .bb-feedback-track-right {
             justify-self: end;
-            animation: bbFeedbackRight 28s linear infinite;
         }
 
         .bb-feedback-track-left {
             justify-self: start;
-            animation: bbFeedbackLeft 26s linear infinite;
-        }
-
-        .bb-feedback-marquee:hover .bb-feedback-track {
-            animation-play-state: paused;
         }
 
         .bb-feedback-card {
@@ -1219,16 +1212,6 @@
             text-align: center;
             font-weight: 400;
             box-shadow: 7px 8px 0 rgba(31, 28, 23, .16);
-        }
-
-        @keyframes bbFeedbackRight {
-            from { transform: translate3d(-50%, 0, 0); }
-            to { transform: translate3d(0, 0, 0); }
-        }
-
-        @keyframes bbFeedbackLeft {
-            from { transform: translate3d(0, 0, 0); }
-            to { transform: translate3d(-50%, 0, 0); }
         }
 
         .bb-faq-showcase {
