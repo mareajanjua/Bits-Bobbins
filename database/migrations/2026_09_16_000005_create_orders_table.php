@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('customer_id')->constrained('users')->restrictOnDelete();
+            $table->unsignedBigInteger('customer_id');
             $table->decimal('total_amount', 10, 2);
             $table->enum('status', ['pending', 'confirmed', 'dispatched', 'delivered', 'cancelled', 'returned', 'replacement_requested'])->default('pending');
             $table->enum('delivery_type', ['home_delivery', 'vpp'])->default('home_delivery');
