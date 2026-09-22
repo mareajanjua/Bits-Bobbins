@@ -138,7 +138,7 @@ class StorefrontController extends Controller
         return view('frontend.kider-home');
     }
 
-    public function about()
+    public function about(Request $request)
     {
         $feedback = DB::table('feedback')
             ->join('customer', 'feedback.customer_id', '=', 'customer.customer_id')
@@ -148,7 +148,14 @@ class StorefrontController extends Controller
             ->limit(6)
             ->get();
 
-        return view('store.about', compact('feedback'));
+        $faqQuery = DB::table('faq')->orderBy('display_order');
+        if ($request->filled('q')) {
+            $faqQuery->where('question', 'like', '%' . $request->q . '%')
+                ->orWhere('answer', 'like', '%' . $request->q . '%');
+        }
+        $faqs = $faqQuery->get();
+
+        return view('store.about', compact('feedback', 'faqs'));
     }
 
     public function products(Request $request)
