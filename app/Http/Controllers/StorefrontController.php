@@ -699,17 +699,6 @@ class StorefrontController extends Controller
         return back()->with('status', 'Feedback submitted.');
     }
 
-    public function faq(Request $request)
-    {
-        $query = DB::table('faq')->orderBy('display_order');
-        if ($request->filled('q')) {
-            $query->where('question', 'like', '%' . $request->q . '%')->orWhere('answer', 'like', '%' . $request->q . '%');
-        }
-        $faqs = $query->get();
-
-        return view('store.faq', compact('faqs'));
-    }
-
     private function ensureProductImageColumns(): void
     {
         if (! DB::select("SHOW COLUMNS FROM product LIKE 'image_front'")) {
