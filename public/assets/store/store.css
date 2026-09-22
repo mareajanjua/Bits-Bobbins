@@ -4771,4 +4771,10 @@ a { color: inherit; text-decoration: none; }
   .bb-navbar-left {
     padding-top: 1rem;
   }
+
+  .bb-search {
+    max-width: none;
+    width: 100%;
+    margin: .75rem 0;
+  }
 }
