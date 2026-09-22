@@ -1,4 +1,4 @@
-<div class="store-product-card" data-product-url="{{ route('store.product', $product->product_id) }}">
+<div class="bb-product-card" data-product-url="{{ route('store.product', $product->product_id) }}" tabindex="0">
   @php
     $frontImage = $product->image_front ?? null;
     $hoverImage = $product->image_hover ?? null;
