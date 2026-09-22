@@ -81,6 +81,24 @@
       </a>
     </div>
   </section>
+
+  <section class="bb-about-faq-section" id="about-faq">
+    <h2>FAQ</h2>
+    <form class="store-faq-search" method="GET" action="{{ route('store.about') }}#about-faq">
+      <input name="q" value="{{ request('q') }}" placeholder="Search FAQ">
+      <button><i class="bi bi-search"></i></button>
+    </form>
+    <div class="store-panel">
+      @forelse ($faqs as $faq)
+        <details class="store-faq-item">
+          <summary>{{ $faq->question }}</summary>
+          <p>{{ $faq->answer }}</p>
+        </details>
+      @empty
+        <p>No FAQs found.</p>
+      @endforelse
+    </div>
+  </section>
 </section>
 
 <script>
