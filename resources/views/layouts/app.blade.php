@@ -852,46 +852,24 @@
 
         @media (max-width: 767.98px) {
             .bb-hero-final {
-                padding-top: 3.5rem;
+                padding: 3.5rem 0 2.75rem;
+            }
+
+            .bb-hero-final-head {
+                margin-bottom: 1rem;
+                padding: 0 .45rem;
             }
 
             .bb-hero-collage {
-                justify-content: flex-start;
-                overflow-x: auto;
-                padding: 1rem .8rem 2.4rem;
-                scrollbar-width: none;
-            }
-
-            .bb-hero-collage::-webkit-scrollbar {
                 display: none;
-            }
-
-            .bb-hero-photo {
-                flex: 0 0 clamp(135px, 38vw, 180px);
-                width: clamp(135px, 38vw, 180px);
-                margin-left: -24px;
-            }
-
-            .bb-hero-photo-0 {
-                margin-left: 0;
-            }
-
-            .bb-hero-photo-2 {
-                flex-basis: clamp(155px, 43vw, 205px);
-                width: clamp(155px, 43vw, 205px);
-            }
-
-            .bb-hero-photo-4 {
-                width: clamp(135px, 38vw, 180px);
-            }
-
-            .bb-hero-face {
-                right: 4%;
-                bottom: -1rem;
             }
 
             .bb-hero-spark {
                 display: none;
+            }
+
+            .bb-hero-actions {
+                margin-top: 1rem;
             }
 
             .bb-products-head {
@@ -906,14 +884,41 @@
             .bb-why-banner {
                 grid-template-columns: 1fr;
                 border-radius: 26px;
+                gap: 0;
+                overflow: hidden;
             }
 
             .bb-why-banner-copy {
                 width: auto;
+                padding: 1.25rem 1rem 1.35rem;
             }
 
             .bb-why-banner-image {
-                max-width: 420px;
+                width: 100%;
+                max-width: none;
+                max-height: 190px;
+                object-fit: cover;
+            }
+
+            .bb-why-banner-copy .bb-faq-title {
+                font-size: clamp(2.7rem, 14vw, 4rem);
+            }
+
+            .bb-why-banner-copy p {
+                margin: .85rem 0 1rem;
+            }
+
+            .bb-why-points {
+                gap: .75rem;
+            }
+
+            .bb-why-points li {
+                align-items: flex-start;
+                gap: .65rem;
+            }
+
+            .bb-why-banner-copy .bb-category-cta {
+                align-self: flex-end;
             }
         }
 
@@ -1480,13 +1485,87 @@
                 grid-template-columns: 1fr;
             }
 
+            .bb-faq-side {
+                order: 2;
+            }
+
+            .bb-faq-list {
+                order: 1;
+            }
+
             .bb-faq-contact {
                 margin-top: 1.5rem;
             }
 
-            .bb-cta-sticker,
-            .bb-cta-spark {
+            .bb-feedback-marquee {
+                display: block;
+                width: 100%;
+                margin-left: 0;
+                overflow-x: auto;
+                overflow-y: hidden;
+                padding: .25rem .1rem 1.1rem;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .bb-feedback-track {
+                transform: none !important;
+            }
+
+            .bb-feedback-track-right {
                 display: none;
+            }
+
+            .bb-feedback-sequence[aria-hidden="true"] {
+                display: none;
+            }
+
+            .bb-feedback-sequence {
+                gap: .9rem;
+                padding-right: 0;
+            }
+
+            .bb-feedback-card {
+                flex: 0 0 min(82vw, 330px);
+                min-height: 230px;
+                scroll-snap-align: center;
+            }
+
+            .bb-signup-panel {
+                padding: 3rem 1rem 2.6rem;
+                overflow: hidden;
+            }
+
+            .bb-cta-sticker {
+                display: block;
+                width: clamp(92px, 34vw, 132px);
+            }
+
+            .bb-cta-sticker-left {
+                left: -1rem;
+                top: .75rem;
+            }
+
+            .bb-cta-sticker-right {
+                right: -1rem;
+                top: auto;
+                bottom: .55rem;
+            }
+
+            .bb-cta-spark {
+                display: block;
+                width: 16px;
+                height: 16px;
+            }
+
+            .bb-cta-spark-one {
+                left: 1rem;
+                top: 44%;
+            }
+
+            .bb-cta-spark-two {
+                right: 1.1rem;
+                top: 28%;
             }
         }
 

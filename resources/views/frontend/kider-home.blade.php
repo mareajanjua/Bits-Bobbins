@@ -347,7 +347,7 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="bb-faq-layout">
-                            <div>
+                            <div class="bb-faq-side">
                                 <h2 class="bb-faq-title">Got Questions?<span class="bb-faq-sticker">FAQ</span></h2>
                                 <div class="bb-faq-contact">
                                     <h3>Still got<br>questions?</h3>
