@@ -553,12 +553,14 @@ class StorefrontController extends Controller
             'order_status' => $orderStatus,
         ]);
 
-        foreach ($items as $index => $item) {
+        $nextSequence = (int) DB::table('order_item')->max('item_sequence');
+        foreach ($items as $item) {
+            $nextSequence++;
             DB::table('order_item')->insert([
                 'order_id' => $orderId,
                 'product_id' => $item->product->product_id,
                 'delivery_code' => $data['delivery_code'],
-                'item_sequence' => str_pad((string) ($index + 1), 8, '0', STR_PAD_LEFT),
+                'item_sequence' => str_pad((string) $nextSequence, 8, '0', STR_PAD_LEFT),
                 'quantity' => $item->quantity,
                 'unit_price' => $item->product->price,
                 'item_status' => $orderStatus,
