@@ -1864,7 +1864,6 @@
                 document.body.classList.remove("bb-community-locked");
             };
 
-            window.setTimeout(openModal, 650);
             closeButton?.addEventListener("click", closeModal);
             modal.addEventListener("click", (event) => {
                 if (event.target === modal) closeModal();
