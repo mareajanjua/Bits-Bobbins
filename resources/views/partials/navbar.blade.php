@@ -41,7 +41,7 @@
                         </div>
                     </div>
                     <a href="{{ route('store.about') }}#about-brand" class="nav-item nav-link">About</a>
-                    <a href="{{ route('store.faq') }}" class="nav-item nav-link">FAQ</a>
+                    <a href="{{ route('store.about') }}#about-faq" class="nav-item nav-link">FAQ</a>
                     <a href="{{ route('store.about') }}#about-contact" class="nav-item nav-link">Contact</a>
                 </div>
                 <div class="d-none d-lg-flex align-items-center gap-4 bb-navbar-right ms-auto">
@@ -91,7 +91,7 @@
                         <a href="{{ route('store.home') }}">Home</a>
                         <a href="{{ route('store.products') }}">Shop</a>
                         <a href="{{ route('store.about') }}#about-brand">About</a>
-                        <a href="{{ route('store.faq') }}">FAQ</a>
+                        <a href="{{ route('store.about') }}#about-faq">FAQ</a>
                         <a href="{{ route('store.about') }}#about-contact">Contact</a>
                     </nav>
                     <div class="bb-full-menu-group">
