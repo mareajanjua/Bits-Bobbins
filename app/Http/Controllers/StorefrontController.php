@@ -386,6 +386,10 @@ class StorefrontController extends Controller
 
     public function checkout()
     {
+        if (! session('customer_id')) {
+            return redirect()->route('customer.login')->with('status', 'Please log in or create an account before checkout.');
+        }
+
         $this->ensurePaymentSupportsDd();
         $this->ensureDeliveryTypes();
         $items = $this->cartItems();
@@ -471,6 +475,10 @@ class StorefrontController extends Controller
 
     public function placeOrder(Request $request)
     {
+        if (! session('customer_id')) {
+            return redirect()->route('customer.login')->with('status', 'Please log in or create an account before placing an order.');
+        }
+
         $this->ensurePaymentSupportsDd();
         $this->ensureDeliveryTypes();
         $this->ensureFeedbackProductColumn();
