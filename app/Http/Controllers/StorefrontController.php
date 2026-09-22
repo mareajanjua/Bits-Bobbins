@@ -630,8 +630,87 @@ class StorefrontController extends Controller
         $items = DB::table('order_item')->join('product', 'order_item.product_id', '=', 'product.product_id')->where('order_id', $order)->select('order_item.*', 'product.product_name', 'product.has_warranty', 'product.warranty_months')->get();
         $payment = DB::table('payment')->where('order_id', $order)->first();
         $dispatch = DB::table('dispatch')->whereIn('order_item_id', $items->pluck('order_item_id'))->get();
+        $returnRequests = DB::table('return_replace_request')->whereIn('order_item_id', $items->pluck('order_item_id'))->get()->keyBy('order_item_id');
 
-        return view('store.order-detail', compact('header', 'items', 'payment', 'dispatch'));
+        return view('store.order-detail', compact('header', 'items', 'payment', 'dispatch', 'returnRequests'));
+    }
+
+    public function cancelOrderItem(int $order, int $item)
+    {
+        $record = DB::table('order_item')
+            ->join('orders', 'order_item.order_id', '=', 'orders.order_id')
+            ->where('orders.customer_id', session('customer_id'))
+            ->where('orders.order_id', $order)
+            ->where('order_item.order_item_id', $item)
+            ->select('order_item.*')
+            ->first();
+        abort_unless($record, 404);
+
+        if (in_array($record->item_status, ['dispatched', 'delivered', 'cancelled', 'return_requested', 'returned', 'replace_requested', 'replaced'], true)) {
+            return back()->withErrors(['order' => 'This item can no longer be cancelled.']);
+        }
+
+        DB::table('order_item')->where('order_item_id', $item)->update(['item_status' => 'cancelled']);
+
+        $remainingActive = DB::table('order_item')
+            ->where('order_id', $order)
+            ->where('item_status', '!=', 'cancelled')
+            ->exists();
+
+        if (! $remainingActive) {
+            DB::table('orders')->where('order_id', $order)->update(['order_status' => 'cancelled']);
+        }
+
+        return back()->with('status', 'Order item cancelled.');
+    }
+
+    public function requestReturnReplace(Request $request, int $order, int $item)
+    {
+        $data = $request->validate([
+            'request_type' => ['required', Rule::in(['return', 'replace'])],
+            'reason' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $record = DB::table('order_item')
+            ->join('orders', 'order_item.order_id', '=', 'orders.order_id')
+            ->leftJoin('dispatch', 'order_item.order_item_id', '=', 'dispatch.order_item_id')
+            ->where('orders.customer_id', session('customer_id'))
+            ->where('orders.order_id', $order)
+            ->where('order_item.order_item_id', $item)
+            ->select('order_item.*', 'dispatch.actual_delivery_date')
+            ->first();
+        abort_unless($record, 404);
+
+        if ($record->item_status !== 'delivered' || ! $record->actual_delivery_date) {
+            return back()->withErrors(['order' => 'Return or replacement can only be requested after delivery.']);
+        }
+
+        if (now()->startOfDay()->diffInDays(\Carbon\Carbon::parse($record->actual_delivery_date)->startOfDay(), false) < -7) {
+            return back()->withErrors(['order' => 'Return or replacement is only available within 7 days of delivery.']);
+        }
+
+        $alreadyRequested = DB::table('return_replace_request')
+            ->where('order_item_id', $item)
+            ->whereIn('status', ['requested', 'approved'])
+            ->exists();
+
+        if ($alreadyRequested) {
+            return back()->withErrors(['order' => 'A return or replacement request already exists for this item.']);
+        }
+
+        DB::table('return_replace_request')->insert([
+            'order_item_id' => $item,
+            'request_type' => $data['request_type'],
+            'reason' => $data['reason'] ?? null,
+            'request_date' => now(),
+            'status' => 'requested',
+        ]);
+
+        DB::table('order_item')->where('order_item_id', $item)->update([
+            'item_status' => $data['request_type'] === 'return' ? 'return_requested' : 'replace_requested',
+        ]);
+
+        return back()->with('status', ucfirst($data['request_type']) . ' request submitted.');
     }
 
     public function addresses()
