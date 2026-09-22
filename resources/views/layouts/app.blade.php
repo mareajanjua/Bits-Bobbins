@@ -1735,105 +1735,6 @@
             background: #fff !important;
         }
 
-        .bb-full-menu {
-            position: fixed;
-            inset: 0;
-            z-index: 9999;
-            display: none;
-            background: #5E442B;
-            color: #fff;
-            overflow-y: auto;
-        }
-
-        .bb-full-menu.is-open {
-            display: block;
-        }
-
-        .bb-full-menu-inner {
-            min-height: 100vh;
-            padding: clamp(1.25rem, 3vw, 2.5rem);
-            display: grid;
-            grid-template-rows: auto 1fr;
-            gap: 2rem;
-        }
-
-        .bb-full-menu-top {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-        }
-
-        .bb-full-menu-brand {
-            color: #fff;
-            font-family: "Porcelain", cursive;
-            font-size: clamp(3rem, 7vw, 6.5rem);
-            line-height: 1;
-        }
-
-        .bb-menu-close {
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            border: 1px solid rgba(253, 246, 236, .42);
-            background: #fff;
-            color: #5E442B;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.35rem;
-        }
-
-        .bb-full-menu-grid {
-            display: grid;
-            grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(180px, .7fr));
-            gap: clamp(1.25rem, 4vw, 4rem);
-            align-items: start;
-            padding-top: 2rem;
-        }
-
-        .bb-full-menu-main {
-            display: grid;
-            gap: .7rem;
-        }
-
-        .bb-full-menu-main a {
-            color: #fff;
-            font-size: clamp(2.2rem, 5vw, 5.4rem);
-            line-height: .95;
-            font-weight: 400;
-        }
-
-        .bb-full-menu-main a:hover,
-        .bb-full-menu-list a:hover {
-            color: #FFFFFF;
-        }
-
-        .bb-full-menu-group h3 {
-            color: rgba(253, 246, 236, .72);
-            font-family: "Heebo", sans-serif;
-            font-size: .9rem;
-            letter-spacing: .14em;
-            text-transform: uppercase;
-            margin-bottom: 1rem;
-            font-weight: 400;
-        }
-
-        .bb-full-menu-list {
-            display: grid;
-            gap: .65rem;
-        }
-
-        .bb-full-menu-list a {
-            color: #fff;
-            font-size: clamp(1rem, 1.7vw, 1.25rem);
-            font-weight: 400;
-        }
-
-        body.bb-menu-locked {
-            overflow: hidden;
-        }
-
         .bb-community-modal {
             position: fixed;
             inset: 0;
@@ -1999,15 +1900,6 @@
         }
 
         @media (max-width: 991.98px) {
-            .bb-full-menu-grid {
-                grid-template-columns: 1fr;
-                padding-top: 1rem;
-            }
-
-            .bb-full-menu-main a {
-                font-size: clamp(2.2rem, 14vw, 4.3rem);
-            }
-
             .bb-community-card {
                 width: min(480px, calc(100vw - 1rem));
             }
