@@ -23,7 +23,6 @@
     $feedbackSlides = $feedbackPreview->values();
     $faqPreview = DB::table('faq')
         ->orderBy('display_order')
-        ->limit(4)
         ->get();
     $categoryImages = [
         'art&craft' => 'assets/frontend/img/Home Page/Category/Art&Craft.png',

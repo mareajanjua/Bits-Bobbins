@@ -49,7 +49,6 @@
     $feedbackBottomRow = $feedbackSlides->filter(fn ($item, $index) => $index % 2 === 1)->values();
     $faqPreview = DB::table('faq')
         ->orderBy('display_order')
-        ->limit(4)
         ->get();
     $categoryImages = [
         'art&craft' => 'assets/frontend/img/Home Page/Category/Art&Craft.png',
