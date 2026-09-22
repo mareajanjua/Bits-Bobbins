@@ -23,11 +23,12 @@
                                 @php($categorySubs = $frontendSubcategories->get($category->category_code, collect()))
                                 @if ($categorySubs->isNotEmpty())
                                     <div class="bb-category-with-submenu">
-                                        <a href="{{ route('store.products', ['category' => $category->category_code]) }}" class="dropdown-item">{{ $category->category_name }}</a>
-                                        <button type="button" class="bb-category-subtoggle" aria-label="Show {{ $category->category_name }} subcategories">
+                                        <button type="button" class="dropdown-item bb-category-accordion-toggle" aria-expanded="false">
+                                            <span>{{ $category->category_name }}</span>
                                             <i class="fa fa-chevron-down"></i>
                                         </button>
-                                        <div class="dropdown-menu rounded-0 rounded-bottom border-0 shadow-sm m-0 bb-shop-menu dropdown-submenu">
+                                        <div class="bb-category-submenu" hidden>
+                                            <a href="{{ route('store.products', ['category' => $category->category_code]) }}" class="dropdown-item">All {{ $category->category_name }}</a>
                                             @foreach ($categorySubs as $subcategory)
                                                 <a href="{{ route('store.products', ['category' => $category->category_code, 'subcategory' => $subcategory->subcategory_id]) }}" class="dropdown-item">{{ $subcategory->subcategory_name }}</a>
                                             @endforeach
@@ -98,10 +99,23 @@
                         <div class="bb-full-menu-list">
                             <a href="{{ route('store.products') }}">All Products</a>
                             @foreach ($frontendCategories as $category)
-                                <a href="{{ route('store.products', ['category' => $category->category_code]) }}">{{ $category->category_name }}</a>
-                                @foreach ($frontendSubcategories->get($category->category_code, collect()) as $subcategory)
-                                    <a href="{{ route('store.products', ['category' => $category->category_code, 'subcategory' => $subcategory->subcategory_id]) }}">- {{ $subcategory->subcategory_name }}</a>
-                                @endforeach
+                                @php($categorySubs = $frontendSubcategories->get($category->category_code, collect()))
+                                @if ($categorySubs->isNotEmpty())
+                                    <div class="bb-full-menu-category">
+                                        <button type="button" class="bb-full-menu-category-toggle" aria-expanded="false">
+                                            <span>{{ $category->category_name }}</span>
+                                            <i class="fa fa-chevron-down"></i>
+                                        </button>
+                                        <div class="bb-full-menu-sublist" hidden>
+                                            <a href="{{ route('store.products', ['category' => $category->category_code]) }}">All {{ $category->category_name }}</a>
+                                            @foreach ($categorySubs as $subcategory)
+                                                <a href="{{ route('store.products', ['category' => $category->category_code, 'subcategory' => $subcategory->subcategory_id]) }}">{{ $subcategory->subcategory_name }}</a>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @else
+                                    <a href="{{ route('store.products', ['category' => $category->category_code]) }}">{{ $category->category_name }}</a>
+                                @endif
                             @endforeach
                         </div>
                     </div>

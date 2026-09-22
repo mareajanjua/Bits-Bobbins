@@ -143,46 +143,81 @@
         }
 
         .bb-shop-menu .bb-category-with-submenu {
-            position: relative;
             display: grid;
-            grid-template-columns: minmax(0, 1fr) auto;
-            align-items: center;
+            gap: 0;
         }
 
-        .bb-shop-menu .dropdown-submenu {
-            position: absolute;
-            top: 0;
-            left: 100%;
-            min-width: 220px;
-            display: block !important;
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-            margin-top: 0 !important;
-            margin-left: .35rem !important;
-            z-index: 30;
-            transition: opacity .12s ease, visibility .12s ease;
-        }
-
-        .bb-category-subtoggle {
+        .bb-category-accordion-toggle,
+        .bb-full-menu-category-toggle {
+            width: 100%;
             border: 0;
             background: transparent;
-            color: #111;
-            min-width: 36px;
-            align-self: stretch;
+            color: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .85rem;
+            text-align: left;
+            font: inherit;
             font-weight: 400;
         }
 
-        .bb-category-subtoggle:hover,
-        .bb-category-subtoggle:focus {
+        .bb-category-accordion-toggle {
+            color: #111;
+        }
+
+        .bb-category-accordion-toggle:hover,
+        .bb-category-accordion-toggle:focus {
             background: #5E442B;
             color: #fff;
         }
 
-        .bb-shop-menu .bb-category-with-submenu:hover > .dropdown-submenu {
-            opacity: 1;
-            visibility: visible;
-            pointer-events: auto;
+        .bb-category-accordion-toggle i,
+        .bb-full-menu-category-toggle i {
+            transition: transform .16s ease;
+        }
+
+        .bb-category-with-submenu.is-open .bb-category-accordion-toggle i,
+        .bb-full-menu-category.is-open .bb-full-menu-category-toggle i {
+            transform: rotate(180deg);
+        }
+
+        .bb-category-submenu,
+        .bb-full-menu-sublist {
+            display: grid;
+            gap: 0;
+        }
+
+        .bb-category-submenu {
+            padding: .2rem 0 .35rem .75rem;
+            background: #fff;
+        }
+
+        .bb-category-submenu .dropdown-item {
+            font-size: .95rem;
+            color: #111;
+        }
+
+        .bb-full-menu-category {
+            display: grid;
+            gap: .45rem;
+        }
+
+        .bb-full-menu-category-toggle {
+            padding: 0;
+            color: #fff;
+            font-size: clamp(1rem, 1.7vw, 1.25rem);
+        }
+
+        .bb-full-menu-sublist {
+            gap: .45rem;
+            padding-left: 1rem;
+        }
+
+        .bb-full-menu-sublist a {
+            color: rgba(255, 255, 255, .82);
+            font-size: clamp(.95rem, 1.4vw, 1.08rem);
+            font-weight: 400;
         }
 
         .bb-shop-menu {
@@ -1736,6 +1771,19 @@
                 if (event.key === "Escape" && menu.classList.contains("is-open")) {
                     closeMenu();
                 }
+            });
+
+            document.querySelectorAll(".bb-category-with-submenu, .bb-full-menu-category").forEach((item) => {
+                const button = item.querySelector(".bb-category-accordion-toggle, .bb-full-menu-category-toggle");
+                const panel = item.querySelector(".bb-category-submenu, .bb-full-menu-sublist");
+                if (!button || !panel) return;
+
+                button.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    const isOpen = item.classList.toggle("is-open");
+                    button.setAttribute("aria-expanded", String(isOpen));
+                    panel.hidden = !isOpen;
+                });
             });
         })();
     </script>
