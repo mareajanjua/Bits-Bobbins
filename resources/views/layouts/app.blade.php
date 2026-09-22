@@ -1703,6 +1703,7 @@
 
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
+    <script src="{{ asset('assets/js/sliders.js') }}"></script>
     <script>
         (() => {
             const sliders = document.querySelectorAll(".bb-category-slider, .bb-product-slider");
