@@ -84,11 +84,13 @@ Route::prefix('admin')->name('admin.')->middleware('admin.session')->group(funct
     Route::post('/products', [ModuleController::class, 'saveProduct'])->name('products.store');
     Route::get('/products/{product}/edit', [ModuleController::class, 'productForm'])->name('products.edit');
     Route::post('/products/{product}', [ModuleController::class, 'saveProduct'])->name('products.update');
+    Route::delete('/products/{product}', [ModuleController::class, 'deleteProduct'])->name('products.destroy');
     Route::get('/categories', [ModuleController::class, 'categories'])->name('categories.index');
     Route::get('/categories/create', [ModuleController::class, 'categoryForm'])->name('categories.create');
     Route::post('/categories', [ModuleController::class, 'saveCategory'])->name('categories.store');
     Route::get('/categories/{category}/edit', [ModuleController::class, 'categoryForm'])->name('categories.edit');
     Route::post('/categories/{category}', [ModuleController::class, 'saveCategory'])->name('categories.update');
+    Route::delete('/categories/{category}', [ModuleController::class, 'deleteCategory'])->name('categories.destroy');
     Route::post('/categories/{category}/subcategories', [ModuleController::class, 'saveSubcategory'])->name('categories.subcategories.store');
     Route::delete('/subcategories/{subcategory}', [ModuleController::class, 'deleteSubcategory'])->name('subcategories.destroy');
     Route::get('/stock', fn (ModuleController $controller) => $controller->stock(false))->name('stock.index');

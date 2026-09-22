@@ -45,7 +45,7 @@ class ModuleController extends Controller
                 $this->stockStatus((int) ($row->quantity_available ?? 0), (bool) $row->is_active),
                 $this->productDetailsSummary($row->product_id),
                 '<a href="' . route('store.product', $row->product_id) . '" class="table-btn-action" target="_blank" title="View Product"><i class="bi bi-eye"></i></a>',
-                '<a href="' . route('admin.products.edit', $row->product_id) . '" class="table-btn-action"><i class="bi bi-pencil"></i></a>',
+                '<div class="action-row"><a href="' . route('admin.products.edit', $row->product_id) . '" class="table-btn-action"><i class="bi bi-pencil"></i></a><form method="POST" action="' . route('admin.products.destroy', $row->product_id) . '" class="inline-action-form">' . csrf_field() . method_field('DELETE') . '<button class="table-btn-action delete" title="Delete"><i class="bi bi-trash"></i></button></form></div>',
             ]),
             'empty' => 'No products found.',
         ]);
@@ -198,6 +198,21 @@ class ModuleController extends Controller
         return redirect()->route('admin.products.index')->with('status', 'Product added.');
     }
 
+    public function deleteProduct(string $product)
+    {
+        $hasOrders = DB::table('order_item')->where('product_id', $product)->exists();
+
+        if ($hasOrders) {
+            return back()->withErrors(['product' => 'This product has order history, so it cannot be deleted. Set it inactive instead.']);
+        }
+
+        DB::table('product_detail')->where('product_id', $product)->delete();
+        DB::table('stock')->where('product_id', $product)->delete();
+        DB::table('product')->where('product_id', $product)->delete();
+
+        return redirect()->route('admin.products.index')->with('status', 'Product deleted.');
+    }
+
     public function categories()
     {
         $this->ensureSubcategoryTables();
@@ -214,7 +229,7 @@ class ModuleController extends Controller
                 $row->category_code,
                 $row->category_name,
                 DB::table('subcategory')->where('category_code', $row->category_code)->count(),
-                '<a href="' . route('admin.categories.edit', $row->category_code) . '" class="table-btn-action"><i class="bi bi-pencil"></i></a>',
+                '<div class="action-row"><a href="' . route('admin.categories.edit', $row->category_code) . '" class="table-btn-action"><i class="bi bi-pencil"></i></a><form method="POST" action="' . route('admin.categories.destroy', $row->category_code) . '" class="inline-action-form">' . csrf_field() . method_field('DELETE') . '<button class="table-btn-action delete" title="Delete"><i class="bi bi-trash"></i></button></form></div>',
             ]),
             'empty' => 'No categories found.',
         ]);
@@ -253,6 +268,20 @@ class ModuleController extends Controller
         DB::table('category')->insert($data);
 
         return redirect()->route('admin.categories.index')->with('status', 'Category added.');
+    }
+
+    public function deleteCategory(string $category)
+    {
+        $hasProducts = DB::table('product')->where('category_code', $category)->exists();
+
+        if ($hasProducts) {
+            return back()->withErrors(['category' => 'This category has products, so it cannot be deleted. Move or delete those products first.']);
+        }
+
+        DB::table('subcategory')->where('category_code', $category)->delete();
+        DB::table('category')->where('category_code', $category)->delete();
+
+        return redirect()->route('admin.categories.index')->with('status', 'Category deleted.');
     }
 
     public function saveSubcategory(Request $request, string $category)
@@ -308,7 +337,7 @@ class ModuleController extends Controller
         ]);
     }
 
-    public function orders(?string $delivery = null)
+    public function orders(Request $request, ?string $delivery = null)
     {
         $query = DB::table('order_item')
             ->join('orders', 'order_item.order_id', '=', 'orders.order_id')
@@ -318,8 +347,22 @@ class ModuleController extends Controller
             ->leftJoin('payment', 'orders.order_id', '=', 'payment.order_id')
             ->select('orders.order_id', 'order_item.order_number', 'customer.full_name', 'product.product_name', 'delivery_type.delivery_name', DB::raw('(order_item.quantity * order_item.unit_price) as amount'), DB::raw('COALESCE(payment.payment_status, "pending") as payment_status'), 'orders.order_status', 'orders.order_date');
 
-        if ($delivery) {
-            $query->where('order_item.delivery_code', $delivery);
+        $deliveryCode = $delivery ?: $request->query('delivery_code');
+
+        if ($deliveryCode) {
+            $query->where('order_item.delivery_code', $deliveryCode);
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('orders.order_date', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('orders.order_date', '<=', $request->date_to);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('orders.order_status', $request->status);
         }
 
         $rows = $query->orderByDesc('orders.order_date')->limit(50)->get();
