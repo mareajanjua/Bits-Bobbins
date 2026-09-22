@@ -191,41 +191,8 @@
                     <div class="bb-product-slider">
                     <?php if ($latestProducts->isNotEmpty()): ?>
                     <?php foreach ($latestProducts as $product): ?>
-                        <?php
-                            $stockQty = (int) ($product->stock_qty ?? 0);
-                            $stockClass = $stockQty <= 0 ? 'out' : ($stockQty <= 5 ? 'low' : '');
-                            $stockLabel = $stockQty <= 0 ? 'Out of stock' : ($stockQty <= 5 ? 'Low stock' : 'In stock');
-                            $hoverImage = $product->image_hover ?? null;
-                        ?>
                         <div class="bb-product-slide">
-                            <div class="bb-product-card" data-product-url="<?php echo e(route('store.product', $product->product_id)); ?>" tabindex="0">
-                                <a href="<?php echo e(route('store.product', $product->product_id)); ?>" class="bb-product-image" aria-label="View <?php echo e($product->product_name); ?> details">
-                                    <?php if (! empty($product->image_front)): ?>
-                                        <img src="<?php echo e(asset($product->image_front)); ?>" alt="<?php echo e($product->product_name); ?>">
-                                        <?php if ($hoverImage): ?>
-                                            <img src="<?php echo e(asset($hoverImage)); ?>" alt="<?php echo e($product->product_name); ?> hover" class="bb-product-hover-img">
-                                        <?php endif; ?>
-                                    <?php else: ?>
-                                        <i class="fa fa-gift"></i>
-                                    <?php endif; ?>
-                                </a>
-                                <div class="bb-product-body">
-                                    <div class="bb-product-info-row">
-                                        <div>
-                                            <a href="<?php echo e(route('store.product', $product->product_id)); ?>"><h3 class="h6 mb-1"><?php echo e($product->product_name); ?></h3></a>
-                                            <div class="bb-product-meta"><span class="bb-stock-pill <?php echo e($stockClass); ?>">(<?php echo e($stockLabel); ?>)</span></div>
-                                        </div>
-                                        <span class="bb-price">PKR <?php echo e(number_format($product->price, 0)); ?></span>
-                                    </div>
-                                    <form method="POST" action="<?php echo e(route('cart.add', $product->product_id)); ?>" data-cart-form>
-                                        <?php echo csrf_field(); ?>
-                                        <button type="submit" class="bb-product-buy-btn" <?php if($stockQty <= 0): echo 'disabled'; endif; ?>>
-                                            <i class="fa fa-shopping-cart"></i>
-                                            Add to cart
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
+                            @include('store.partials.product-card', ['product' => $product, 'variant' => 'home'])
                         </div>
                     <?php endforeach; ?>
                     <?php else: ?>
@@ -270,46 +237,8 @@
                     <div class="bb-product-slider">
                     <?php if ($bestSellerProducts->isNotEmpty()): ?>
                     <?php foreach ($bestSellerProducts as $product): ?>
-                        <?php
-                            $stockQty = (int) ($product->stock_qty ?? 0);
-                            $stockClass = $stockQty <= 0 ? 'out' : ($stockQty <= 5 ? 'low' : '');
-                            $stockLabel = $stockQty <= 0 ? 'Out of stock' : ($stockQty <= 5 ? 'Low stock' : 'In stock');
-                            $hoverImage = $product->image_hover ?? null;
-                        ?>
                         <div class="bb-product-slide">
-                            <div class="bb-product-card" data-product-url="<?php echo e(route('store.product', $product->product_id)); ?>" tabindex="0">
-                                <a href="<?php echo e(route('store.product', $product->product_id)); ?>" class="bb-product-image" aria-label="View <?php echo e($product->product_name); ?> details">
-                                    <?php if (! empty($product->image_front)): ?>
-                                        <img src="<?php echo e(asset($product->image_front)); ?>" alt="<?php echo e($product->product_name); ?>">
-                                        <?php if ($hoverImage): ?>
-                                            <img src="<?php echo e(asset($hoverImage)); ?>" alt="<?php echo e($product->product_name); ?> hover" class="bb-product-hover-img">
-                                        <?php endif; ?>
-                                    <?php else: ?>
-                                        <i class="fa fa-gift"></i>
-                                    <?php endif; ?>
-                                </a>
-                                <div class="bb-product-body">
-                                    <div class="bb-product-info-row">
-                                        <div>
-                                            <a href="<?php echo e(route('store.product', $product->product_id)); ?>"><h3 class="h6 mb-1"><?php echo e($product->product_name); ?></h3></a>
-                                            <div class="bb-product-meta">
-                                                <span class="bb-stock-pill <?php echo e($stockClass); ?>">(<?php echo e($stockLabel); ?>)</span>
-                                                <?php if (($product->review_count ?? 0) > 0): ?>
-                                                    <span><?php echo e(number_format($product->avg_rating, 1)); ?>/5 rating</span>
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
-                                        <span class="bb-price">PKR <?php echo e(number_format($product->price, 0)); ?></span>
-                                    </div>
-                                    <form method="POST" action="<?php echo e(route('cart.add', $product->product_id)); ?>" data-cart-form>
-                                        <?php echo csrf_field(); ?>
-                                        <button type="submit" class="bb-product-buy-btn" <?php if($stockQty <= 0): echo 'disabled'; endif; ?>>
-                                            <i class="fa fa-shopping-cart"></i>
-                                            Add to cart
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
+                            @include('store.partials.product-card', ['product' => $product, 'variant' => 'home', 'showRating' => true])
                         </div>
                     <?php endforeach; ?>
                     <?php else: ?>
