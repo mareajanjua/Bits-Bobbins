@@ -60,6 +60,8 @@ Route::middleware('customer.session')->group(function () {
     Route::get('/order-confirmation/{order}', [StorefrontController::class, 'confirmation'])->name('order.confirmation');
     Route::get('/my-orders', [StorefrontController::class, 'myOrders'])->name('customer.orders');
     Route::get('/my-orders/{order}', [StorefrontController::class, 'myOrderDetail'])->name('customer.orders.show');
+    Route::post('/my-orders/{order}/items/{item}/cancel', [StorefrontController::class, 'cancelOrderItem'])->name('customer.orders.items.cancel');
+    Route::post('/my-orders/{order}/items/{item}/return-replace', [StorefrontController::class, 'requestReturnReplace'])->name('customer.orders.items.return_replace');
     Route::get('/my-addresses', [StorefrontController::class, 'addresses'])->name('customer.addresses');
     Route::post('/my-addresses', [StorefrontController::class, 'saveAddress'])->name('customer.addresses.store');
     Route::get('/feedback', [StorefrontController::class, 'feedback'])->name('customer.feedback');
