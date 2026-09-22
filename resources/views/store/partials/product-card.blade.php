@@ -42,7 +42,7 @@
   </div>
 </div>
 @else
-<div class="bb-product-card" data-product-url="{{ route('store.product', $product->product_id) }}" tabindex="0">
+<div class="store-product-card" data-product-url="{{ route('store.product', $product->product_id) }}" tabindex="0">
   <a class="store-product-art" href="{{ route('store.product', $product->product_id) }}">
     @if ($frontImage)
       <img src="{{ asset($frontImage) }}" alt="{{ $product->product_name }}">

@@ -37,7 +37,7 @@
     });
 
     slider.addEventListener("click", (event) => {
-      if (event.target.closest("a, button, form, input, select, textarea, label, .bb-product-card, .bb-category-card")) return;
+      if (event.target.closest("a, button, form, input, select, textarea, label, .bb-product-card, .store-product-card, .bb-category-card")) return;
 
       if (blockClick) {
         event.preventDefault();
@@ -60,7 +60,7 @@
     });
   });
 
-  document.querySelectorAll(".bb-product-card[data-product-url]").forEach((card) => {
+  document.querySelectorAll(".bb-product-card[data-product-url], .store-product-card[data-product-url]").forEach((card) => {
     const openProduct = () => {
       if (card.dataset.productUrl) {
         window.location.href = card.dataset.productUrl;
