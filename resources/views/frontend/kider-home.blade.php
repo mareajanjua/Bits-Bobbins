@@ -118,243 +118,275 @@
         <?php endif; ?>
 
 
-        <section class="bb-hero-final">
+        <section class="bb-home-section bb-home-section--hero bb-hero-final">
             <div class="container">
-                <div class="bb-hero-final-head">
-                    <h1 class="bb-hero-final-title">Always Find The <span class="bb-hero-title-word"><span class="bb-category-sticker">Tiny picks</span>Sweetest</span> Little Treasures</h1>
-                    <p class="bb-hero-final-copy">Dolls, gifts, stationery, bags, wallets, and playful accessories for happy little everyday moments.</p>
-                </div>
-                <div class="bb-hero-collage" aria-label="Bits&Bobbins product collage">
-                    <?php $__currentLoopData = $heroImages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $heroImage): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <div class="bb-hero-photo bb-hero-photo-<?php echo e($loop->index); ?>">
-                            <img src="<?php echo e(asset($heroImage)); ?>?v=hero-clean-2" alt="Bits&Bobbins hero image <?php echo e($loop->iteration); ?>">
+                <div class="row justify-content-center">
+                    <div class="col-12">
+                        <div class="bb-hero-final-head">
+                            <h1 class="bb-hero-final-title">Always Find The <span class="bb-hero-title-word"><span class="bb-category-sticker">Tiny picks</span>Sweetest</span> Little Treasures</h1>
+                            <p class="bb-hero-final-copy">Dolls, gifts, stationery, bags, wallets, and playful accessories for happy little everyday moments.</p>
                         </div>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                    <img class="bb-hero-face" src="<?php echo e(asset('assets/frontend/img/Home Page/Stickers_and_Icons/Smile.png')); ?>" alt="Smiling sticker">
-                </div>
-                <div class="bb-hero-actions">
-                    <a href="<?php echo e(route('store.products')); ?>" class="bb-outline-btn bb-category-cta">Shop Now <i class="fa fa-arrow-right ms-2"></i></a>
-                </div>
-            </div>
-        </section>
-
-        <section class="bb-section bb-section-soft" id="categories">
-            <div class="container">
-                <div class="text-center">
-                    <h2 class="bb-faq-title"><span class="bb-category-sticker">Categories</span>Find Your Perfect Little World</h2>
-                    <span class="bb-section-eyebrow">Discover the most loved Bits&Bobbins categories for tiny treasures, sweet gifts, and playful everyday picks.</span>
-                </div>
-                <div class="bb-category-slider">
-                    <?php if ($frontendCategories->isNotEmpty()): ?>
-                    <?php foreach ($frontendCategories as $category): ?>
-                        <?php
-                            $categoryKey = strtolower(trim($category->category_name));
-                            $categoryImage = $categoryImages[$categoryKey] ?? null;
-                        ?>
-                        <div class="bb-category-slide">
-                            <a href="<?php echo e(route('store.products', ['category' => $category->category_code])); ?>" class="bb-category-card">
-                                <div class="bb-category-image">
-                                    <?php if ($categoryImage): ?>
-                                        <img src="<?php echo e(asset($categoryImage)); ?>" alt="<?php echo e($category->category_name); ?>">
-                                    <?php else: ?>
-                                        <i class="fa fa-gift"></i>
-                                    <?php endif; ?>
+                        <div class="bb-hero-collage" aria-label="Bits&Bobbins product collage">
+                            <?php $__currentLoopData = $heroImages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $heroImage): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <div class="bb-hero-photo bb-hero-photo-<?php echo e($loop->index); ?>">
+                                    <img src="<?php echo e(asset($heroImage)); ?>?v=hero-clean-2" alt="Bits&Bobbins hero image <?php echo e($loop->iteration); ?>">
                                 </div>
-                                <h3><?php echo e($category->category_name); ?></h3>
-                            </a>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            <img class="bb-hero-face" src="<?php echo e(asset('assets/frontend/img/Home Page/Stickers_and_Icons/Smile.png')); ?>" alt="Smiling sticker">
                         </div>
-                    <?php endforeach; ?>
-                    <?php else: ?>
-                        <div class="bb-category-slide">
-                            <div class="bb-preview-card text-center">No categories available yet.</div>
+                        <div class="bb-hero-actions">
+                            <a href="<?php echo e(route('store.products')); ?>" class="bb-outline-btn bb-category-cta">Shop Now <i class="fa fa-arrow-right ms-2"></i></a>
                         </div>
-                    <?php endif; ?>
-                </div>
-                <div class="bb-category-cta-row">
-                    <a href="<?php echo e(route('store.products')); ?>" class="bb-outline-btn bb-category-cta">Explore All <i class="fa fa-arrow-right ms-2"></i></a>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <section class="bb-section">
+        <section class="bb-home-section bb-home-section--categories bb-section bb-section-soft" id="categories">
             <div class="container">
-                <div class="bb-products-head flex-column flex-md-row">
-                    <div>
-                        <h2 class="bb-faq-title"><span class="bb-category-sticker">New Picks</span>Tiny Treasures</h2>
-                        <p class="bb-section-eyebrow text-md-start">Fresh playful finds from the real product shelf.</p>
-                    </div>
-                    <a href="<?php echo e(route('store.products', ['sort' => 'newest'])); ?>" class="bb-outline-btn bb-category-cta">View More <i class="fa fa-arrow-right ms-2"></i></a>
-                </div>
-                <div class="bb-product-carousel-wrap">
-                    <button type="button" class="bb-product-arrow prev" data-product-slide="prev" aria-label="Previous products"><i class="fa fa-arrow-left"></i></button>
-                    <div class="bb-product-slider">
-                    <?php if ($latestProducts->isNotEmpty()): ?>
-                    <?php foreach ($latestProducts as $product): ?>
-                        <div class="bb-product-slide">
-                            @include('store.partials.product-card', ['product' => $product, 'variant' => 'home'])
+                <div class="row justify-content-center">
+                    <div class="col-12">
+                        <div class="bb-section-head text-center">
+                            <h2 class="bb-faq-title"><span class="bb-category-sticker">Categories</span>Find Your Perfect Little World</h2>
+                            <span class="bb-section-eyebrow">Discover the most loved Bits&Bobbins categories for tiny treasures, sweet gifts, and playful everyday picks.</span>
                         </div>
-                    <?php endforeach; ?>
-                    <?php else: ?>
-                        <div class="bb-product-slide">
-                            <div class="bb-preview-card text-center">No products available yet.</div>
-                        </div>
-                    <?php endif; ?>
-                    </div>
-                    <button type="button" class="bb-product-arrow next" data-product-slide="next" aria-label="Next products"><i class="fa fa-arrow-right"></i></button>
-                </div>
-            </div>
-        </section>
-
-        <section class="bb-why-banner-section" id="about">
-            <div class="bb-why-banner">
-                <img class="bb-why-banner-image" src="<?php echo e(asset('assets/frontend/img/Home Page/Category/banner.png')); ?>" alt="Bits&Bobbins playful shop banner">
-                <div class="bb-why-banner-copy">
-                    <h2 class="bb-faq-title"><span class="bb-category-sticker">Why us?</span>Tiny Joy, Delivered Right</h2>
-                    <p>Bits&Bobbins keeps kids' shopping cheerful and practical, with playful picks, clear product details, and simple ordering for busy families.</p>
-                    <ul class="bb-why-points">
-                        <li><i class="bi bi-check2"></i><span>Fresh dolls, gifts, stationery, bags, wallets, and accessories.</span></li>
-                        <li><i class="bi bi-check2"></i><span>Doorstep delivery with secure payment options.</span></li>
-                        <li><i class="bi bi-check2"></i><span>Easy 7-day return or replace support where eligible.</span></li>
-                        <li><i class="bi bi-check2"></i><span>Warranty details shown clearly when applicable.</span></li>
-                    </ul>
-                    <a href="<?php echo e(route('store.products')); ?>" class="bb-outline-btn bb-category-cta">Shop Now <i class="fa fa-arrow-right ms-2"></i></a>
-                </div>
-            </div>
-        </section>
-
-        <section class="bb-section bb-section-soft">
-            <div class="container">
-                <div class="bb-products-head flex-column flex-md-row">
-                    <div>
-                        <h2 class="bb-faq-title"><span class="bb-category-sticker">Popular</span>Best Sellers</h2>
-                        <p class="bb-section-eyebrow text-md-start">Highest-rated favourites from real customer product reviews.</p>
-                    </div>
-                    <a href="<?php echo e(route('store.products')); ?>" class="bb-outline-btn bb-category-cta">View More <i class="fa fa-arrow-right ms-2"></i></a>
-                </div>
-                <div class="bb-product-carousel-wrap">
-                    <button type="button" class="bb-product-arrow prev" data-product-slide="prev" aria-label="Previous best sellers"><i class="fa fa-arrow-left"></i></button>
-                    <div class="bb-product-slider">
-                    <?php if ($bestSellerProducts->isNotEmpty()): ?>
-                    <?php foreach ($bestSellerProducts as $product): ?>
-                        <div class="bb-product-slide">
-                            @include('store.partials.product-card', ['product' => $product, 'variant' => 'home', 'showRating' => true])
-                        </div>
-                    <?php endforeach; ?>
-                    <?php else: ?>
-                        <div class="bb-product-slide">
-                            <div class="bb-preview-card text-center">No rated products yet.</div>
-                        </div>
-                    <?php endif; ?>
-                    </div>
-                    <button type="button" class="bb-product-arrow next" data-product-slide="next" aria-label="Next best sellers"><i class="fa fa-arrow-right"></i></button>
-                </div>
-            </div>
-        </section>
-
-        <section class="bb-section bb-feedback-section">
-            <div class="container">
-                <div class="bb-feedback-head">
-                    <h2 class="bb-feedback-title"><span class="bb-feedback-sticker">Feedback</span>What people are saying?</h2>
-                    <p class="bb-feedback-subtitle">Real words from Bits&Bobbins customers, pulled from submitted feedback.</p>
-                </div>
-            </div>
-            <?php if($feedbackSlides->isNotEmpty()): ?>
-                <div class="bb-feedback-marquee" aria-label="Customer feedback slider">
-                    <div class="bb-feedback-track bb-feedback-track-left">
-                        @foreach ([false, true] as $isClone)
-                            <div class="bb-feedback-sequence" @if ($isClone) aria-hidden="true" @endif>
-                                <?php $__currentLoopData = $feedbackTopRow; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <article class="bb-feedback-card">
-                                        <p class="bb-feedback-quote">&ldquo;<?php echo e(\Illuminate\Support\Str::limit($item->message, 150)); ?>&rdquo;</p>
-                                        <div class="bb-feedback-person">
-                                            <span class="bb-feedback-avatar">
-                                                <?php if(! empty($item->profile_photo)): ?>
-                                                    <img src="<?php echo e(asset($item->profile_photo)); ?>" alt="<?php echo e($item->full_name); ?>">
-                                                <?php else: ?>
-                                                    <?php echo e(strtoupper(\Illuminate\Support\Str::substr($item->full_name, 0, 1))); ?>
-                                                <?php endif; ?>
-                                            </span>
-                                            <div>
-                                                <strong><?php echo e($item->full_name); ?></strong>
-                                                <span><?php echo e($item->rating ?? 'N/A'); ?>/5 rating<?php echo e($item->product_name ? ' - ' . $item->product_name : ''); ?></span>
-                                            </div>
+                        <div class="bb-slider bb-slider--categories bb-category-slider">
+                            <?php if ($frontendCategories->isNotEmpty()): ?>
+                            <?php foreach ($frontendCategories as $category): ?>
+                                <?php
+                                    $categoryKey = strtolower(trim($category->category_name));
+                                    $categoryImage = $categoryImages[$categoryKey] ?? null;
+                                ?>
+                                <div class="bb-category-slide">
+                                    <a href="<?php echo e(route('store.products', ['category' => $category->category_code])); ?>" class="bb-category-card">
+                                        <div class="bb-category-image">
+                                            <?php if ($categoryImage): ?>
+                                                <img src="<?php echo e(asset($categoryImage)); ?>" alt="<?php echo e($category->category_name); ?>">
+                                            <?php else: ?>
+                                                <i class="fa fa-gift"></i>
+                                            <?php endif; ?>
                                         </div>
-                                    </article>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                            </div>
-                        @endforeach
-                    </div>
-                    @if ($feedbackBottomRow->isNotEmpty())
-                    <div class="bb-feedback-track bb-feedback-track-right">
-                        @foreach ([false, true] as $isClone)
-                            <div class="bb-feedback-sequence" @if ($isClone) aria-hidden="true" @endif>
-                                <?php $__currentLoopData = $feedbackBottomRow; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <article class="bb-feedback-card">
-                                        <p class="bb-feedback-quote">&ldquo;<?php echo e(\Illuminate\Support\Str::limit($item->message, 150)); ?>&rdquo;</p>
-                                        <div class="bb-feedback-person">
-                                            <span class="bb-feedback-avatar">
-                                                <?php if(! empty($item->profile_photo)): ?>
-                                                    <img src="<?php echo e(asset($item->profile_photo)); ?>" alt="<?php echo e($item->full_name); ?>">
-                                                <?php else: ?>
-                                                    <?php echo e(strtoupper(\Illuminate\Support\Str::substr($item->full_name, 0, 1))); ?>
-                                                <?php endif; ?>
-                                            </span>
-                                            <div>
-                                                <strong><?php echo e($item->full_name); ?></strong>
-                                                <span><?php echo e($item->rating ?? 'N/A'); ?>/5 rating<?php echo e($item->product_name ? ' - ' . $item->product_name : ''); ?></span>
-                                            </div>
-                                        </div>
-                                    </article>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                            </div>
-                        @endforeach
-                    </div>
-                    @endif
-                </div>
-            <?php else: ?>
-                <div class="container">
-                    <div class="bb-feedback-empty">No feedback available yet.</div>
-                </div>
-            <?php endif; ?>
-        </section>
-
-        <section class="bb-section bb-faq-showcase">
-            <div class="container">
-                <div class="bb-faq-layout">
-                    <div>
-                        <h2 class="bb-faq-title">Got Questions?<span class="bb-faq-sticker">FAQ</span></h2>
-                        <div class="bb-faq-contact">
-                            <h3>Still got<br>questions?</h3>
-                            <a href="#contact" class="bb-outline-btn">Contact Us</a>
+                                        <h3><?php echo e($category->category_name); ?></h3>
+                                    </a>
+                                </div>
+                            <?php endforeach; ?>
+                            <?php else: ?>
+                                <div class="bb-category-slide">
+                                    <div class="bb-preview-card text-center">No categories available yet.</div>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="bb-category-cta-row">
+                            <a href="<?php echo e(route('store.products')); ?>" class="bb-outline-btn bb-category-cta">Explore All <i class="fa fa-arrow-right ms-2"></i></a>
                         </div>
                     </div>
-                    <div class="bb-faq-list">
-                        <?php $__empty_1 = true; $__currentLoopData = $faqPreview; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $faq): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                            <details class="bb-faq-item" <?php if($loop->first): ?> open <?php endif; ?>>
-                                <summary><?php echo e($faq->question); ?></summary>
-                                <p><?php echo e($faq->answer); ?></p>
-                            </details>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                            <div class="bb-faq-item">
-                                <p class="p-3">No FAQs available yet.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="bb-home-section bb-home-section--new-products bb-section">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="bb-section-head bb-products-head flex-column flex-md-row">
+                            <div>
+                                <h2 class="bb-faq-title"><span class="bb-category-sticker">New Picks</span>Tiny Treasures</h2>
+                                <p class="bb-section-eyebrow text-md-start">Fresh playful finds from the real product shelf.</p>
                             </div>
+                            <a href="<?php echo e(route('store.products', ['sort' => 'newest'])); ?>" class="bb-outline-btn bb-category-cta">View More <i class="fa fa-arrow-right ms-2"></i></a>
+                        </div>
+                        <div class="bb-slider-wrap bb-slider-wrap--products bb-product-carousel-wrap">
+                            <button type="button" class="bb-product-arrow prev" data-product-slide="prev" aria-label="Previous products"><i class="fa fa-arrow-left"></i></button>
+                            <div class="bb-slider bb-slider--products bb-product-slider">
+                            <?php if ($latestProducts->isNotEmpty()): ?>
+                            <?php foreach ($latestProducts as $product): ?>
+                                <div class="bb-product-slide">
+                                    @include('store.partials.product-card', ['product' => $product, 'variant' => 'home'])
+                                </div>
+                            <?php endforeach; ?>
+                            <?php else: ?>
+                                <div class="bb-product-slide">
+                                    <div class="bb-preview-card text-center">No products available yet.</div>
+                                </div>
+                            <?php endif; ?>
+                            </div>
+                            <button type="button" class="bb-product-arrow next" data-product-slide="next" aria-label="Next products"><i class="fa fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bb-home-section bb-home-section--why bb-why-banner-section" id="about">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="bb-why-banner">
+                            <img class="bb-why-banner-image" src="<?php echo e(asset('assets/frontend/img/Home Page/Category/banner.png')); ?>" alt="Bits&Bobbins playful shop banner">
+                            <div class="bb-why-banner-copy">
+                                <h2 class="bb-faq-title"><span class="bb-category-sticker">Why us?</span>Tiny Joy, Delivered Right</h2>
+                                <p>Bits&Bobbins keeps kids' shopping cheerful and practical, with playful picks, clear product details, and simple ordering for busy families.</p>
+                                <ul class="bb-why-points">
+                                    <li><i class="bi bi-check2"></i><span>Fresh dolls, gifts, stationery, bags, wallets, and accessories.</span></li>
+                                    <li><i class="bi bi-check2"></i><span>Doorstep delivery with secure payment options.</span></li>
+                                    <li><i class="bi bi-check2"></i><span>Easy 7-day return or replace support where eligible.</span></li>
+                                    <li><i class="bi bi-check2"></i><span>Warranty details shown clearly when applicable.</span></li>
+                                </ul>
+                                <a href="<?php echo e(route('store.products')); ?>" class="bb-outline-btn bb-category-cta">Shop Now <i class="fa fa-arrow-right ms-2"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bb-home-section bb-home-section--best-sellers bb-section bb-section-soft">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="bb-section-head bb-products-head flex-column flex-md-row">
+                            <div>
+                                <h2 class="bb-faq-title"><span class="bb-category-sticker">Popular</span>Best Sellers</h2>
+                                <p class="bb-section-eyebrow text-md-start">Highest-rated favourites from real customer product reviews.</p>
+                            </div>
+                            <a href="<?php echo e(route('store.products')); ?>" class="bb-outline-btn bb-category-cta">View More <i class="fa fa-arrow-right ms-2"></i></a>
+                        </div>
+                        <div class="bb-slider-wrap bb-slider-wrap--products bb-product-carousel-wrap">
+                            <button type="button" class="bb-product-arrow prev" data-product-slide="prev" aria-label="Previous best sellers"><i class="fa fa-arrow-left"></i></button>
+                            <div class="bb-slider bb-slider--products bb-product-slider">
+                            <?php if ($bestSellerProducts->isNotEmpty()): ?>
+                            <?php foreach ($bestSellerProducts as $product): ?>
+                                <div class="bb-product-slide">
+                                    @include('store.partials.product-card', ['product' => $product, 'variant' => 'home', 'showRating' => true])
+                                </div>
+                            <?php endforeach; ?>
+                            <?php else: ?>
+                                <div class="bb-product-slide">
+                                    <div class="bb-preview-card text-center">No rated products yet.</div>
+                                </div>
+                            <?php endif; ?>
+                            </div>
+                            <button type="button" class="bb-product-arrow next" data-product-slide="next" aria-label="Next best sellers"><i class="fa fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bb-home-section bb-home-section--feedback bb-section bb-feedback-section">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-12">
+                        <div class="bb-section-head bb-feedback-head">
+                            <h2 class="bb-feedback-title"><span class="bb-feedback-sticker">Feedback</span>What people are saying?</h2>
+                            <p class="bb-feedback-subtitle">Real words from Bits&Bobbins customers, pulled from submitted feedback.</p>
+                        </div>
+                        <?php if($feedbackSlides->isNotEmpty()): ?>
+                            <div class="bb-slider-wrap bb-slider-wrap--feedback bb-feedback-marquee" aria-label="Customer feedback slider">
+                                <div class="bb-feedback-track bb-feedback-track-left">
+                                    @foreach ([false, true] as $isClone)
+                                        <div class="bb-feedback-sequence" @if ($isClone) aria-hidden="true" @endif>
+                                            <?php $__currentLoopData = $feedbackTopRow; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <article class="bb-feedback-card">
+                                                    <p class="bb-feedback-quote">&ldquo;<?php echo e(\Illuminate\Support\Str::limit($item->message, 150)); ?>&rdquo;</p>
+                                                    <div class="bb-feedback-person">
+                                                        <span class="bb-feedback-avatar">
+                                                            <?php if(! empty($item->profile_photo)): ?>
+                                                                <img src="<?php echo e(asset($item->profile_photo)); ?>" alt="<?php echo e($item->full_name); ?>">
+                                                            <?php else: ?>
+                                                                <?php echo e(strtoupper(\Illuminate\Support\Str::substr($item->full_name, 0, 1))); ?>
+                                                            <?php endif; ?>
+                                                        </span>
+                                                        <div>
+                                                            <strong><?php echo e($item->full_name); ?></strong>
+                                                            <span><?php echo e($item->rating ?? 'N/A'); ?>/5 rating<?php echo e($item->product_name ? ' - ' . $item->product_name : ''); ?></span>
+                                                        </div>
+                                                    </div>
+                                                </article>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                @if ($feedbackBottomRow->isNotEmpty())
+                                <div class="bb-feedback-track bb-feedback-track-right">
+                                    @foreach ([false, true] as $isClone)
+                                        <div class="bb-feedback-sequence" @if ($isClone) aria-hidden="true" @endif>
+                                            <?php $__currentLoopData = $feedbackBottomRow; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <article class="bb-feedback-card">
+                                                    <p class="bb-feedback-quote">&ldquo;<?php echo e(\Illuminate\Support\Str::limit($item->message, 150)); ?>&rdquo;</p>
+                                                    <div class="bb-feedback-person">
+                                                        <span class="bb-feedback-avatar">
+                                                            <?php if(! empty($item->profile_photo)): ?>
+                                                                <img src="<?php echo e(asset($item->profile_photo)); ?>" alt="<?php echo e($item->full_name); ?>">
+                                                            <?php else: ?>
+                                                                <?php echo e(strtoupper(\Illuminate\Support\Str::substr($item->full_name, 0, 1))); ?>
+                                                            <?php endif; ?>
+                                                        </span>
+                                                        <div>
+                                                            <strong><?php echo e($item->full_name); ?></strong>
+                                                            <span><?php echo e($item->rating ?? 'N/A'); ?>/5 rating<?php echo e($item->product_name ? ' - ' . $item->product_name : ''); ?></span>
+                                                        </div>
+                                                    </div>
+                                                </article>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                @endif
+                            </div>
+                        <?php else: ?>
+                            <div class="bb-feedback-empty">No feedback available yet.</div>
                         <?php endif; ?>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section class="bb-section bb-signup-cta">
+        <section class="bb-home-section bb-home-section--faq bb-section bb-faq-showcase">
             <div class="container">
-                <div class="bb-signup-panel">
-                    <span class="bb-cta-spark bb-cta-spark-one" aria-hidden="true"></span>
-                    <span class="bb-cta-spark bb-cta-spark-two" aria-hidden="true"></span>
-                    <span class="bb-cta-sticker bb-cta-sticker-left">New picks</span>
-                    <span class="bb-cta-sticker bb-cta-sticker-right">Shop happy</span>
-                    <h2 class="bb-signup-title">Be the first to catch tiny treasures, sweet deals, and playful new arrivals.</h2>
-                    <div class="bb-signup-actions">
-                        <a href="<?php echo e(route('customer.register')); ?>" class="bb-signup-btn bb-signup-btn-primary">Make Account</a>
-                        <a href="<?php echo e(route('store.products')); ?>" class="bb-outline-btn bb-category-cta">Shop All</a>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="bb-faq-layout">
+                            <div>
+                                <h2 class="bb-faq-title">Got Questions?<span class="bb-faq-sticker">FAQ</span></h2>
+                                <div class="bb-faq-contact">
+                                    <h3>Still got<br>questions?</h3>
+                                    <a href="#contact" class="bb-outline-btn">Contact Us</a>
+                                </div>
+                            </div>
+                            <div class="bb-faq-list">
+                                <?php $__empty_1 = true; $__currentLoopData = $faqPreview; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $faq): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                    <details class="bb-faq-item" <?php if($loop->first): ?> open <?php endif; ?>>
+                                        <summary><?php echo e($faq->question); ?></summary>
+                                        <p><?php echo e($faq->answer); ?></p>
+                                    </details>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                                    <div class="bb-faq-item">
+                                        <p class="p-3">No FAQs available yet.</p>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bb-home-section bb-home-section--signup bb-section bb-signup-cta">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-12">
+                        <div class="bb-signup-panel">
+                            <span class="bb-cta-spark bb-cta-spark-one" aria-hidden="true"></span>
+                            <span class="bb-cta-spark bb-cta-spark-two" aria-hidden="true"></span>
+                            <span class="bb-cta-sticker bb-cta-sticker-left">New picks</span>
+                            <span class="bb-cta-sticker bb-cta-sticker-right">Shop happy</span>
+                            <h2 class="bb-signup-title">Be the first to catch tiny treasures, sweet deals, and playful new arrivals.</h2>
+                            <div class="bb-signup-actions">
+                                <a href="<?php echo e(route('customer.register')); ?>" class="bb-signup-btn bb-signup-btn-primary">Make Account</a>
+                                <a href="<?php echo e(route('store.products')); ?>" class="bb-outline-btn bb-category-cta">Shop All</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -363,5 +395,4 @@
         
         <!-- Team End -->
 
-        </div>
 @endsection
