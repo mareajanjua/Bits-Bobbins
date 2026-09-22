@@ -1721,7 +1721,7 @@
 
     <!-- Template Javascript -->
     <script src="{{ asset('assets/frontend/js/main.js') }}"></script>
-    <script src="{{ asset('assets/js/sliders.js') }}"></script>
+    <script src="{{ asset('assets/js/sliders.js') }}?v={{ filemtime(public_path('assets/js/sliders.js')) }}"></script>
     <script>
         (() => {
             const menu = document.getElementById("bbFullMenu");
