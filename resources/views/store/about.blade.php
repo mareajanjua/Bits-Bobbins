@@ -3,8 +3,8 @@
 @section('title', 'About')
 
 @section('content')
-<section class="bb-about-page">
-  <section class="bb-about-brand-section" id="about-brand">
+<div class="bb-about-page">
+  <section class="bb-page-section bb-about-section bb-about-brand-section" id="about-brand">
     <div class="container">
       <div class="row align-items-center g-4 g-lg-5">
         <div class="col-lg-6">
@@ -22,106 +22,126 @@
     </div>
   </section>
 
-  <section class="bb-about-feedback-section" id="about-feedback">
+  <section class="bb-page-section bb-about-section bb-about-feedback-section" id="about-feedback">
     <div class="container">
-      <div class="bb-about-section-head">
-        <h2>Customer words</h2>
-      </div>
-
-      <div class="bb-product-carousel-wrap bb-about-feedback-carousel">
-        <button type="button" class="bb-product-nav bb-product-nav-prev" data-product-slide="prev" aria-label="Previous customer words">
-          <i class="fa fa-arrow-left"></i>
-        </button>
-
-        <div class="bb-product-slider">
-          @forelse ($feedback as $item)
-            <div class="bb-product-slide">
-              <article class="bb-about-feedback-card">
-                <p>&ldquo;{{ \Illuminate\Support\Str::limit($item->message, 150) }}&rdquo;</p>
-                <div>
-                  <span class="bb-about-avatar">
-                    @if (! empty($item->profile_photo))
-                      <img src="{{ asset($item->profile_photo) }}" alt="{{ $item->full_name }}">
-                    @else
-                      {{ strtoupper(\Illuminate\Support\Str::substr($item->full_name, 0, 1)) }}
-                    @endif
-                  </span>
-                  <span>
-                    <strong>{{ $item->full_name }}</strong>
-                    <small>{{ $item->rating }}/5 rating{{ $item->product_name ? ' - ' . $item->product_name : '' }}</small>
-                  </span>
-                </div>
-              </article>
-            </div>
-          @empty
-            <div class="bb-product-slide">
-              <article class="bb-about-feedback-card">
-                <p>No customer feedback has been submitted yet.</p>
-                <div>
-                  <span class="bb-about-avatar"><i class="bi bi-chat-square-heart"></i></span>
-                  <span><strong>Bits&amp;Bobbins</strong><small>Feedback will appear here after purchases.</small></span>
-                </div>
-              </article>
-            </div>
-          @endforelse
-        </div>
-
-        <button type="button" class="bb-product-nav bb-product-nav-next" data-product-slide="next" aria-label="Next customer words">
-          <i class="fa fa-arrow-right"></i>
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <section class="bb-about-faq-section" id="about-faq">
-    <div class="container">
-      <div class="bb-faq-layout">
-        <div>
-          <h2 class="bb-faq-title">Got Questions?<span class="bb-faq-sticker">FAQ</span></h2>
-          <div class="bb-faq-contact">
-            <h3>Still got<br>questions?</h3>
-            <a href="#about-contact" class="bb-outline-btn">Contact Us</a>
+      <div class="row">
+        <div class="col-12">
+          <div class="bb-section-head bb-about-section-head">
+            <h2>Customer words</h2>
           </div>
         </div>
-        <div class="bb-faq-list">
-          @forelse ($faqs as $faq)
-            <details class="bb-faq-item" @if ($loop->first) open @endif>
-              <summary>{{ $faq->question }}</summary>
-              <p>{{ $faq->answer }}</p>
-            </details>
-          @empty
-            <div class="bb-faq-item">
-              <p class="p-3">No FAQs available yet.</p>
+      </div>
+
+      <div class="row">
+        <div class="col-12">
+          <div class="bb-slider-wrap bb-product-carousel-wrap bb-about-feedback-carousel">
+            <button type="button" class="bb-product-nav bb-product-nav-prev" data-product-slide="prev" aria-label="Previous customer words">
+              <i class="fa fa-arrow-left"></i>
+            </button>
+
+            <div class="bb-slider bb-product-slider">
+              @forelse ($feedback as $item)
+                <div class="bb-product-slide">
+                  <article class="bb-about-feedback-card">
+                    <p>&ldquo;{{ \Illuminate\Support\Str::limit($item->message, 150) }}&rdquo;</p>
+                    <div>
+                      <span class="bb-about-avatar">
+                        @if (! empty($item->profile_photo))
+                          <img src="{{ asset($item->profile_photo) }}" alt="{{ $item->full_name }}">
+                        @else
+                          {{ strtoupper(\Illuminate\Support\Str::substr($item->full_name, 0, 1)) }}
+                        @endif
+                      </span>
+                      <span>
+                        <strong>{{ $item->full_name }}</strong>
+                        <small>{{ $item->rating }}/5 rating{{ $item->product_name ? ' - ' . $item->product_name : '' }}</small>
+                      </span>
+                    </div>
+                  </article>
+                </div>
+              @empty
+                <div class="bb-product-slide">
+                  <article class="bb-about-feedback-card">
+                    <p>No customer feedback has been submitted yet.</p>
+                    <div>
+                      <span class="bb-about-avatar"><i class="bi bi-chat-square-heart"></i></span>
+                      <span><strong>Bits&amp;Bobbins</strong><small>Feedback will appear here after purchases.</small></span>
+                    </div>
+                  </article>
+                </div>
+              @endforelse
             </div>
-          @endforelse
+
+            <button type="button" class="bb-product-nav bb-product-nav-next" data-product-slide="next" aria-label="Next customer words">
+              <i class="fa fa-arrow-right"></i>
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="bb-about-contact-section" id="about-contact">
+  <section class="bb-page-section bb-about-section bb-about-faq-section" id="about-faq">
     <div class="container">
-      <div class="bb-about-section-head">
-        <h2>Contact</h2>
-      </div>
-      <div class="bb-about-contact-grid">
-        <a href="mailto:support@bitsandbobbins.test">
-          <i class="bi bi-envelope"></i>
-          <span>Customer Support</span>
-          <strong>support@bitsandbobbins.test</strong>
-        </a>
-        <a href="mailto:orders@bitsandbobbins.test">
-          <i class="bi bi-bag-check"></i>
-          <span>Orders</span>
-          <strong>orders@bitsandbobbins.test</strong>
-        </a>
-        <a href="mailto:feedback@bitsandbobbins.test">
-          <i class="bi bi-chat-square-heart"></i>
-          <span>Feedback</span>
-          <strong>feedback@bitsandbobbins.test</strong>
-        </a>
+      <div class="row">
+        <div class="col-12">
+          <div class="bb-faq-layout">
+            <div class="bb-faq-side">
+              <h2 class="bb-faq-title">Got Questions?<span class="bb-faq-sticker">FAQ</span></h2>
+              <div class="bb-faq-contact">
+                <h3>Still got<br>questions?</h3>
+                <a href="#about-contact" class="bb-outline-btn">Contact Us</a>
+              </div>
+            </div>
+            <div class="bb-faq-list">
+              @forelse ($faqs as $faq)
+                <details class="bb-faq-item" @if ($loop->first) open @endif>
+                  <summary>{{ $faq->question }}</summary>
+                  <p>{{ $faq->answer }}</p>
+                </details>
+              @empty
+                <div class="bb-faq-item">
+                  <p class="p-3">No FAQs available yet.</p>
+                </div>
+              @endforelse
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
-</section>
+
+  <section class="bb-page-section bb-about-section bb-about-contact-section" id="about-contact">
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <div class="bb-section-head bb-about-section-head">
+            <h2>Contact</h2>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <div class="bb-about-contact-grid">
+            <a href="mailto:support@bitsandbobbins.test">
+              <i class="bi bi-envelope"></i>
+              <span>Customer Support</span>
+              <strong>support@bitsandbobbins.test</strong>
+            </a>
+            <a href="mailto:orders@bitsandbobbins.test">
+              <i class="bi bi-bag-check"></i>
+              <span>Orders</span>
+              <strong>orders@bitsandbobbins.test</strong>
+            </a>
+            <a href="mailto:feedback@bitsandbobbins.test">
+              <i class="bi bi-chat-square-heart"></i>
+              <span>Feedback</span>
+              <strong>feedback@bitsandbobbins.test</strong>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
 @endsection
