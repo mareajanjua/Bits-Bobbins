@@ -50,7 +50,6 @@ Route::post('/register', [StorefrontController::class, 'register'])->name('custo
 Route::get('/forgot-password', [StorefrontController::class, 'forgotPasswordForm'])->name('customer.password.request');
 Route::post('/forgot-password', [StorefrontController::class, 'forgotPassword'])->name('customer.password.email');
 Route::post('/logout', [StorefrontController::class, 'logout'])->name('customer.logout');
-Route::get('/faq', [StorefrontController::class, 'faq'])->name('store.faq');
 Route::get('/checkout', [StorefrontController::class, 'checkout'])->name('checkout.index');
 Route::post('/checkout/place-order', [StorefrontController::class, 'placeOrder'])->name('checkout.place');
 
