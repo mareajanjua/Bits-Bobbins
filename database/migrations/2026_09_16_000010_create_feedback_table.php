@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('feedback', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('customer_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->unsignedBigInteger('customer_id')->nullable();
             $table->string('name', 100);
             $table->string('email', 150);
             $table->text('message');
