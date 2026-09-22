@@ -10,10 +10,8 @@
 
     const stopDrag = () => {
       isDown = false;
-      setTimeout(() => {
-        isDragging = false;
-        blockClick = false;
-      }, 120);
+      isDragging = false;
+      blockClick = false;
       slider.classList.remove("is-dragging");
     };
 
@@ -29,7 +27,7 @@
     slider.addEventListener("pointermove", (event) => {
       if (!isDown) return;
       const dragDistance = Math.abs((event.pageX - slider.offsetLeft) - startX);
-      if (dragDistance < 14) return;
+      if (dragDistance < 24) return;
       isDragging = true;
       blockClick = true;
       slider.classList.add("is-dragging");
@@ -39,9 +37,10 @@
     });
 
     slider.addEventListener("click", (event) => {
+      if (event.target.closest("a, button, form, input, select, textarea, label")) return;
+
       if (blockClick) {
         event.preventDefault();
-        event.stopPropagation();
       }
     }, true);
 
