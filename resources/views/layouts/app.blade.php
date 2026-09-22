@@ -92,14 +92,14 @@
     <link href="{{ asset('assets/dashboard/libs/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
 
     <!-- Libraries Stylesheet -->
-    <link href="lib/animate/animate.min.css" rel="stylesheet">
-    <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+    <link href="{{ asset('assets/frontend/lib/animate/animate.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/frontend/lib/owlcarousel/assets/owl.carousel.min.css') }}" rel="stylesheet">
 
     <!-- Customized Bootstrap Stylesheet -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ asset('assets/frontend/css/bootstrap.min.css') }}" rel="stylesheet">
 
     <!-- Template Stylesheet -->
-    <link href="css/style.css" rel="stylesheet">
+    <link href="{{ asset('assets/frontend/css/style.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('assets/store/store.css') }}?v={{ filemtime(public_path('assets/store/store.css')) }}">
 
     <style>
@@ -1714,13 +1714,13 @@
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="lib/wow/wow.min.js"></script>
-    <script src="lib/easing/easing.min.js"></script>
-    <script src="lib/waypoints/waypoints.min.js"></script>
-    <script src="lib/owlcarousel/owl.carousel.min.js"></script>
+    <script src="{{ asset('assets/frontend/lib/wow/wow.min.js') }}"></script>
+    <script src="{{ asset('assets/frontend/lib/easing/easing.min.js') }}"></script>
+    <script src="{{ asset('assets/frontend/lib/waypoints/waypoints.min.js') }}"></script>
+    <script src="{{ asset('assets/frontend/lib/owlcarousel/owl.carousel.min.js') }}"></script>
 
     <!-- Template Javascript -->
-    <script src="js/main.js"></script>
+    <script src="{{ asset('assets/frontend/js/main.js') }}"></script>
     <script src="{{ asset('assets/js/sliders.js') }}"></script>
     <script>
         (() => {
