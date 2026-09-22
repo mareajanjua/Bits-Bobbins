@@ -1510,6 +1510,7 @@
 
         #spinner {
             background: #fff !important;
+            pointer-events: none;
         }
 
         .bb-community-modal {
@@ -1712,6 +1713,17 @@
     </div>
 
     <!-- JavaScript Libraries -->
+    <script>
+        (() => {
+            const hideSpinner = () => document.getElementById("spinner")?.classList.remove("show");
+            if (document.readyState === "loading") {
+                document.addEventListener("DOMContentLoaded", hideSpinner, { once: true });
+            } else {
+                hideSpinner();
+            }
+            window.setTimeout(hideSpinner, 400);
+        })();
+    </script>
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('assets/frontend/lib/wow/wow.min.js') }}"></script>
