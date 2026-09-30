@@ -45,7 +45,7 @@
     <div class="bb-product-subtitle"><i class="bi bi-patch-check-fill"></i>{{ $record->category_name }} Pick</div>
 
     <div class="bb-product-tabs" role="list">
-      <button type="button" class="is-active">Description</button>
+      <button type="button">Description</button>
       <button type="button">Details</button>
       <button type="button">Stock</button>
       <button type="button">Warranty</button>
@@ -97,7 +97,7 @@
       @endforeach
     </div>
     <p class="bb-product-detail-help">Have a question we have not answered here? Our team is happy to help with product questions.</p>
-    <a class="bb-product-contact-btn" href="{{ route('store.home') }}#contact">Get in Touch</a>
+    <a class="bb-product-contact-btn" href="{{ route('store.about') }}#about-contact">Get in Touch</a>
   </div>
 </section>
 

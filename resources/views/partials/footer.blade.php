@@ -24,7 +24,7 @@
                     <span>
                         <a href="{{ route('store.products') }}">Products</a>
                         &nbsp;/&nbsp;
-                        <a href="{{ route('store.about') }}#about-faq">FAQ</a>
+                        <a href="{{ route('store.faq') }}">FAQ</a>
                         &nbsp;/&nbsp;
                         <a href="{{ route('customer.login') }}">Login</a>
                     </span>

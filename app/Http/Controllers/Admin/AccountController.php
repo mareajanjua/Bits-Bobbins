@@ -6,8 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 
 class AccountController extends Controller
 {
@@ -73,8 +71,6 @@ class AccountController extends Controller
 
     private function admin(): Admin
     {
-        $this->ensureColumns();
-
         return Admin::query()->firstOrCreate(
             ['username' => 'admin'],
             [
@@ -84,23 +80,5 @@ class AccountController extends Controller
                 'shop_address' => '',
             ]
         );
-    }
-
-    private function ensureColumns(): void
-    {
-        $columns = [
-            'profile_photo' => fn (Blueprint $table) => $table->string('profile_photo', 255)->nullable(),
-            'shop_name' => fn (Blueprint $table) => $table->string('shop_name', 150)->nullable(),
-            'shop_address' => fn (Blueprint $table) => $table->text('shop_address')->nullable(),
-            'notify_returns' => fn (Blueprint $table) => $table->boolean('notify_returns')->default(true),
-            'notify_failed_payments' => fn (Blueprint $table) => $table->boolean('notify_failed_payments')->default(true),
-            'notify_low_stock' => fn (Blueprint $table) => $table->boolean('notify_low_stock')->default(true),
-        ];
-
-        foreach ($columns as $column => $callback) {
-            if (! Schema::hasColumn('admin', $column)) {
-                Schema::table('admin', fn (Blueprint $table) => $callback($table));
-            }
-        }
     }
 }

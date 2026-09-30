@@ -1,66 +1,113 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Bits&Bobbins
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Bits&Bobbins is a Laravel + MySQL online shopping cart project using plain Blade, HTML, CSS and JavaScript on the frontend.
 
-## About Laravel
+## Tech stack
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- PHP / Laravel
+- MySQL
+- Blade templates
+- HTML, CSS and JavaScript
+- Bootstrap Icons and local frontend assets
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Vite is not used in this project.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Database name vs SQL file name
 
-## Learning Laravel
+The database name and SQL file name are intentionally different:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- `bitsandbobbins` is the MySQL database name used in `.env`, `.env.example`, phpMyAdmin and setup instructions.
+- `database/bits_and_bobbins.sql` is only the import file name. It does not contain a `CREATE DATABASE` statement, so it creates tables inside whichever database you import it into.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Clean install
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+1. Run Composer:
 
-## Laravel Sponsors
+   ```powershell
+   composer install
+   ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+2. Copy the environment example:
 
-### Premium Partners
+   ```powershell
+   Copy-Item .env.example .env
+   ```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+3. Generate the Laravel app key:
 
-## Contributing
+   ```powershell
+   php artisan key:generate
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+4. In phpMyAdmin, create an empty database named:
 
-## Code of Conduct
+   ```text
+   bitsandbobbins
+   ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+   Use `utf8mb4_general_ci`.
 
-## Security Vulnerabilities
+5. Import:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+   ```text
+   database/bits_and_bobbins.sql
+   ```
 
-## License
+6. After import, check:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+   - the database has the project tables
+   - `delivery_type` has 3 rows
+   - `admin` has 1 row
+
+7. Start the app:
+
+   ```powershell
+   php artisan serve
+   ```
+
+## Default admin login
+
+```text
+Email: admin@email.com
+Password: admin123
+```
+
+## Important workflow notes
+
+- Card, cheque and DD payments must be cleared before dispatch.
+- VPP / Cash on Delivery orders can be dispatched while payment is pending.
+- VPP payment is automatically marked cleared when the employee marks the last item in that order as delivered.
+- Cancelled orders cannot be manually marked as payment cleared.
+- Refund transfer/payment handling for cancelled paid orders is handled outside this system.
+- Return approval records the refund amount and restores stock.
+- Replacement approval marks the item as replaced; the physical replacement shipment is handled manually by the shop.
+
+## Build the submission zip
+
+Do not zip the folder manually. From the project root, run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\build-submission.ps1
+```
+
+It creates:
+
+```text
+bits_and_bobbins-submission.zip
+```
+
+The script excludes `.env`, `.git`, `vendor`, logs, sessions, compiled views, generated cache files, test uploads and leftover template files.
+
+If the instructor needs `vendor` included because they will run it without Composer, remove `"vendor",` from `$excludeDirs` in `scripts/build-submission.ps1`, then rebuild the zip.
+
+## Test the zip before submitting
+
+1. Unzip `bits_and_bobbins-submission.zip` into a new folder.
+2. Run `composer install`.
+3. Copy `.env.example` to `.env`.
+4. Run `php artisan key:generate`.
+5. Create `bitsandbobbins` in phpMyAdmin.
+6. Import `database/bits_and_bobbins.sql`.
+7. Run `php artisan serve`.
+8. Login as admin and place one test order.
+

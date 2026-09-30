@@ -3,6 +3,10 @@
 @section('title', 'Employee Dashboard')
 
 @section('content')
+@php
+  $pendingTone = $pendingDispatch > 5 ? 'metric-red' : ($pendingDispatch > 0 ? 'metric-orange' : 'metric-green');
+  $overdueTone = $overdueDispatch > 0 ? 'metric-red' : 'metric-green';
+@endphp
 <div class="page-header dashboard-overview-header">
   <div>
     <h1 class="page-title">Employee Dashboard</h1>
@@ -18,6 +22,34 @@
   <div class="col-xl col-md-6"><a href="{{ route('employee.delivery', 'dispatched') }}" class="dashboard-summary-card dashboard-summary-card-green"><div class="dashboard-summary-icon"><i class="bi bi-send-check"></i></div><div class="dashboard-summary-content"><div class="dashboard-summary-title">Dispatched Today</div><div class="dashboard-summary-desc">Courier records made</div><div class="dashboard-summary-value">{{ $dispatchedToday ?: '-' }}</div></div><i class="bi bi-chevron-right dashboard-summary-chevron"></i></a></div>
   <div class="col-xl col-md-6"><a href="{{ route('employee.delivery', 'delivered') }}" class="dashboard-summary-card dashboard-summary-card-green"><div class="dashboard-summary-icon"><i class="bi bi-check2-circle"></i></div><div class="dashboard-summary-content"><div class="dashboard-summary-title">Delivered This Week</div><div class="dashboard-summary-desc">Completed deliveries</div><div class="dashboard-summary-value">{{ $deliveredThisWeek ?: '-' }}</div></div><i class="bi bi-chevron-right dashboard-summary-chevron"></i></a></div>
   <div class="col-xl col-md-6"><a href="{{ route('employee.reports') }}" class="dashboard-summary-card dashboard-summary-card-orange"><div class="dashboard-summary-icon"><i class="bi bi-exclamation-triangle"></i></div><div class="dashboard-summary-content"><div class="dashboard-summary-title">Overdue Dispatch</div><div class="dashboard-summary-desc">Older than 2 days</div><div class="dashboard-summary-value">{{ $overdueDispatch ?: '-' }}</div></div><i class="bi bi-chevron-right dashboard-summary-chevron"></i></a></div>
+
+  <div class="col-12">
+    <div class="card dashboard-overview-card">
+      <div class="dashboard-card-header"><h2 class="card-title"><i class="bi bi-speedometer2"></i> Operations Snapshot</h2></div>
+      <div class="dashboard-metric-list employee-metric-list">
+        <div class="dashboard-metric-row metric-green">
+          <div class="dashboard-metric-title"><span class="dashboard-metric-icon"><i class="bi bi-bag-check"></i></span><span class="dashboard-metric-label">Orders Received Today</span></div>
+          <div class="dashboard-metric-bottom"><span class="dashboard-metric-track"></span><strong>{{ $ordersReceivedToday }}</strong></div>
+        </div>
+        <div class="dashboard-metric-row {{ $pendingTone }}">
+          <div class="dashboard-metric-title"><span class="dashboard-metric-icon"><i class="bi bi-truck"></i></span><span class="dashboard-metric-label">Pending Dispatch</span></div>
+          <div class="dashboard-metric-bottom"><span class="dashboard-metric-track"></span><strong>{{ $pendingDispatch }}</strong></div>
+        </div>
+        <div class="dashboard-metric-row metric-green">
+          <div class="dashboard-metric-title"><span class="dashboard-metric-icon"><i class="bi bi-send-check"></i></span><span class="dashboard-metric-label">Dispatched Today</span></div>
+          <div class="dashboard-metric-bottom"><span class="dashboard-metric-track"></span><strong>{{ $dispatchedToday }}</strong></div>
+        </div>
+        <div class="dashboard-metric-row metric-green">
+          <div class="dashboard-metric-title"><span class="dashboard-metric-icon"><i class="bi bi-check2-circle"></i></span><span class="dashboard-metric-label">Delivered This Week</span></div>
+          <div class="dashboard-metric-bottom"><span class="dashboard-metric-track"></span><strong>{{ $deliveredThisWeek }}</strong></div>
+        </div>
+        <div class="dashboard-metric-row {{ $overdueTone }}">
+          <div class="dashboard-metric-title"><span class="dashboard-metric-icon"><i class="bi bi-exclamation-triangle"></i></span><span class="dashboard-metric-label">Overdue Dispatch</span></div>
+          <div class="dashboard-metric-bottom"><span class="dashboard-metric-track"></span><strong>{{ $overdueDispatch }}</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="col-12">
     <div class="card dashboard-overview-card">

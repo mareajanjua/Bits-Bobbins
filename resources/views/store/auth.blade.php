@@ -9,7 +9,7 @@
     ? 'Sign in to manage your orders, wishlist and account details.'
     : ($isRegister
       ? 'Make a home for your orders, saved addresses and little finds.'
-      : 'Enter your email and we will help you get back into your account.');
+      : 'Enter your account email and choose a new password to get back in.');
 @endphp
 
 @section('title', $pageTitle)
@@ -145,7 +145,32 @@
             <span>Email address</span>
             <input type="email" name="email" value="{{ old('email') }}" autocomplete="email" required>
           </label>
-          <button class="bb-auth-submit" type="submit">Send Reset Link</button>
+          <label>
+            <span>Role</span>
+            <select name="role" required>
+              <option value="customer" @selected(old('role', 'customer') === 'customer')>Customer</option>
+              <option value="employee" @selected(old('role') === 'employee')>Employee</option>
+            </select>
+          </label>
+          <label>
+            <span>New password</span>
+            <div class="bb-password-field">
+              <input type="password" name="password" minlength="8" pattern="(?=.*[A-Za-z])(?=.*\d).{8,}" autocomplete="new-password" required>
+              <button type="button" class="bb-password-toggle" aria-label="Show password" data-password-toggle>
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+          </label>
+          <label>
+            <span>Confirm new password</span>
+            <div class="bb-password-field">
+              <input type="password" name="password_confirmation" autocomplete="new-password" required>
+              <button type="button" class="bb-password-toggle" aria-label="Show password" data-password-toggle>
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+          </label>
+          <button class="bb-auth-submit" type="submit">Reset Password</button>
           <p class="bb-auth-bottom"><a href="{{ route('customer.login') }}">Back to login</a></p>
         </form>
       @endif

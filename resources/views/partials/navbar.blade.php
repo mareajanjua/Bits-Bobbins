@@ -1,4 +1,10 @@
         <!-- Navbar Start -->
+        @php
+            $visitorProfile = $customer ?: ($employee ?: $admin);
+            $visitorAccountRoute = $customer
+                ? route('customer.account')
+                : ($employee ? route('employee.account') : ($admin ? route('admin.account') : route('customer.login')));
+        @endphp
         <nav class="navbar navbar-expand-lg navbar-light sticky-top px-4 px-lg-5 py-lg-0 bb-navbar">
             <div class="bb-navbar-inner">
             <a href="{{ route('store.home') }}" class="navbar-brand">
@@ -6,12 +12,17 @@
             </a>
             <div class="d-flex d-lg-none ms-auto me-2 bb-mobile-icons">
                 <a href="{{ route('store.products') }}" class="bb-icon-btn" aria-label="Search"><i class="fa fa-search"></i></a>
-                <a href="{{ route('cart.index') }}" class="bb-nav-auth-link" aria-label="Cart">Cart(<span data-cart-count>{{ $cartCount }}</span>)</a>
-                <a href="{{ $customer ? route('customer.account') : route('customer.login') }}" class="bb-icon-btn" aria-label="Account"><i class="fa fa-user"></i></a>
+                <a href="{{ $visitorAccountRoute }}" class="bb-icon-btn bb-account-avatar-link" aria-label="Account">
+                    @if ($visitorProfile && !empty($visitorProfile->profile_photo))
+                        <img src="{{ asset($visitorProfile->profile_photo) }}" alt="Account" class="bb-account-avatar">
+                    @else
+                        <i class="fa fa-user"></i>
+                    @endif
+                </a>
+                <button type="button" class="bb-menu-open bb-mobile-menu-open" aria-label="Open menu" aria-controls="bbFullMenu" aria-expanded="false">
+                    <i class="fa fa-bars"></i>
+                </button>
             </div>
-            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
-                <span class="navbar-toggler-icon"></span>
-            </button>
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <div class="navbar-nav bb-navbar-left">
                     <a href="{{ route('store.home') }}" class="nav-item nav-link active">Home</a>
@@ -41,13 +52,18 @@
                         </div>
                     </div>
                     <a href="{{ route('store.about') }}#about-brand" class="nav-item nav-link">About</a>
-                    <a href="{{ route('store.about') }}#about-faq" class="nav-item nav-link">FAQ</a>
+                    <a href="{{ route('store.faq') }}" class="nav-item nav-link">FAQ</a>
                     <a href="{{ route('store.about') }}#about-contact" class="nav-item nav-link">Contact</a>
                 </div>
                 <div class="d-none d-lg-flex align-items-center gap-4 bb-navbar-right ms-auto">
                     <div class="dropdown">
-                        <button class="bb-nav-auth-link border-0 bg-transparent" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Account
+                        <button class="bb-nav-auth-link border-0 bg-transparent d-inline-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            @if ($visitorProfile && !empty($visitorProfile->profile_photo))
+                                <img src="{{ asset($visitorProfile->profile_photo) }}" alt="Account" class="bb-account-avatar">
+                            @else
+                                <i class="fa fa-user"></i>
+                            @endif
+                            <span>Account</span>
                         </button>
                         <div class="dropdown-menu dropdown-menu-end rounded-0 rounded-bottom border-0 shadow-sm m-0 bb-shop-menu">
                             @if ($admin)
@@ -69,7 +85,6 @@
                             @endif
                         </div>
                     </div>
-                    <a href="{{ route('cart.index') }}" class="bb-nav-auth-link" aria-label="Cart">Cart(<span data-cart-count>{{ $cartCount }}</span>)</a>
                     <button type="button" class="bb-menu-open" aria-label="Open menu" aria-controls="bbFullMenu" aria-expanded="false">
                         <i class="fa fa-bars"></i>
                     </button>
@@ -81,17 +96,22 @@
         <div class="bb-full-menu" id="bbFullMenu" aria-hidden="true">
             <div class="bb-full-menu-inner">
                 <div class="bb-full-menu-top">
-                    <a href="{{ route('store.home') }}" class="bb-full-menu-brand">Bits&Bobbins</a>
-                    <button type="button" class="bb-menu-close" aria-label="Close menu">
-                        <i class="fa fa-times"></i>
+                    <button type="button" class="bb-menu-close" aria-label="Back">
+                        <i class="fa fa-arrow-left"></i>
                     </button>
+                    <a href="{{ route('store.home') }}" class="bb-full-menu-brand">Bits&Bobbins</a>
+                    <span class="bb-full-menu-top-spacer" aria-hidden="true"></span>
                 </div>
+                <form class="bb-full-menu-search" method="GET" action="{{ route('store.products') }}" role="search">
+                    <input type="search" name="q" value="{{ request('q') }}" placeholder="Search products..." aria-label="Search products">
+                    <button type="submit" aria-label="Submit search"><i class="fa fa-search"></i></button>
+                </form>
                 <div class="bb-full-menu-grid">
                     <nav class="bb-full-menu-main" aria-label="Main menu">
                         <a href="{{ route('store.home') }}">Home</a>
                         <a href="{{ route('store.products') }}">Shop</a>
                         <a href="{{ route('store.about') }}#about-brand">About</a>
-                        <a href="{{ route('store.about') }}#about-faq">FAQ</a>
+                        <a href="{{ route('store.faq') }}">FAQ</a>
                         <a href="{{ route('store.about') }}#about-contact">Contact</a>
                     </nav>
                     <div class="bb-full-menu-group">

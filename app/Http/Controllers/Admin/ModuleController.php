@@ -12,23 +12,93 @@ class ModuleController extends Controller
 {
     private int $lowStockThreshold = 5;
 
-    public function products()
+    public function search(Request $request)
     {
-        $this->ensureProductImageColumns();
-        $this->ensureSubcategoryTables();
-        $this->ensureProductDetailsTable();
+        $term = trim((string) $request->query('q', ''));
 
-        $rows = DB::table('product')
+        if ($term === '') {
+            return redirect()->route('admin.dashboard');
+        }
+
+        $productMatch = DB::table('product')
+            ->join('category', 'product.category_code', '=', 'category.category_code')
+            ->leftJoin('subcategory', 'product.subcategory_id', '=', 'subcategory.subcategory_id')
+            ->where(function ($query) use ($term) {
+                $query->where('product.product_id', 'like', '%' . $term . '%')
+                    ->orWhere('product.product_name', 'like', '%' . $term . '%')
+                    ->orWhere('category.category_name', 'like', '%' . $term . '%')
+                    ->orWhere('subcategory.subcategory_name', 'like', '%' . $term . '%');
+            })->exists();
+
+        if ($productMatch) {
+            return redirect()->route('admin.products.index', ['search' => $term]);
+        }
+
+        $orderMatch = DB::table('order_item')
+            ->join('orders', 'order_item.order_id', '=', 'orders.order_id')
+            ->join('customer', 'orders.customer_id', '=', 'customer.customer_id')
+            ->join('product', 'order_item.product_id', '=', 'product.product_id')
+            ->where(function ($query) use ($term) {
+                $query->where('order_item.order_number', 'like', '%' . $term . '%')
+                    ->orWhere('customer.full_name', 'like', '%' . $term . '%')
+                    ->orWhere('product.product_name', 'like', '%' . $term . '%');
+            })->exists();
+
+        if ($orderMatch) {
+            return redirect()->route('admin.orders.index', ['search' => $term]);
+        }
+
+        $customerMatch = DB::table('customer')
+            ->where(function ($query) use ($term) {
+                $query->where('full_name', 'like', '%' . $term . '%')
+                    ->orWhere('email', 'like', '%' . $term . '%')
+                    ->orWhere('phone', 'like', '%' . $term . '%');
+            })->exists();
+
+        if ($customerMatch) {
+            return redirect()->route('admin.customers.index', ['search' => $term]);
+        }
+
+        $employeeMatch = DB::table('employee')
+            ->where(function ($query) use ($term) {
+                $query->where('full_name', 'like', '%' . $term . '%')
+                    ->orWhere('email', 'like', '%' . $term . '%')
+                    ->orWhere('phone', 'like', '%' . $term . '%');
+            })->exists();
+
+        if ($employeeMatch) {
+            return redirect()->route('admin.employees.index', ['search' => $term]);
+        }
+
+        return redirect()->route('admin.dashboard')->withErrors([
+            'search' => 'No product, order, customer, employee, ID, or category matched: ' . $term,
+        ]);
+    }
+
+    public function products(Request $request)
+    {
+        $search = trim((string) $request->query('search', $request->query('q', '')));
+
+        $query = DB::table('product')
             ->join('category', 'product.category_code', '=', 'category.category_code')
             ->leftJoin('subcategory', 'product.subcategory_id', '=', 'subcategory.subcategory_id')
             ->leftJoin('stock', 'product.product_id', '=', 'stock.product_id')
-            ->select('product.product_id', 'category.category_name', 'subcategory.subcategory_name', 'product.product_name', 'product.price', 'stock.quantity_available', 'product.has_warranty', 'product.is_active', 'product.image_front')
-            ->orderBy('product.product_name')
-            ->get();
+            ->select('product.product_id', 'category.category_name', 'subcategory.subcategory_name', 'product.product_name', 'product.price', 'stock.quantity_available', 'product.has_warranty', 'product.is_active', 'product.image_front');
+
+        if ($search !== '') {
+            $query->where(function ($filter) use ($search) {
+                $filter->where('product.product_id', 'like', '%' . $search . '%')
+                    ->orWhere('product.product_name', 'like', '%' . $search . '%')
+                    ->orWhere('category.category_name', 'like', '%' . $search . '%')
+                    ->orWhere('subcategory.subcategory_name', 'like', '%' . $search . '%');
+            });
+        }
+
+        $rows = $query->orderBy('product.product_name')->get();
 
         return view('admin.modules.table', [
             'title' => 'Products',
-            'subtitle' => 'Manage product details, stock, warranty, and active status.',
+            'subtitle' => $search !== '' ? 'Showing products matching: ' . $search : 'Manage product details, stock, warranty, and active status.',
             'icon' => 'bi-box-seam',
             'actionLabel' => 'Add Product',
             'actionRoute' => route('admin.products.create'),
@@ -53,9 +123,6 @@ class ModuleController extends Controller
 
     public function productForm(?string $product = null)
     {
-        $this->ensureProductImageColumns();
-        $this->ensureSubcategoryTables();
-        $this->ensureProductDetailsTable();
         $record = $product ? DB::table('product')->where('product_id', $product)->first() : null;
         $categories = DB::table('category')->orderBy('category_name')->get();
         $subcategories = DB::table('subcategory')->orderBy('subcategory_name')->get();
@@ -73,8 +140,6 @@ class ModuleController extends Controller
 
     public function productDetails()
     {
-        $this->ensureProductDetailsTable();
-
         $rows = DB::table('product')
             ->join('category', 'product.category_code', '=', 'category.category_code')
             ->leftJoin('product_detail', 'product.product_id', '=', 'product_detail.product_id')
@@ -104,10 +169,6 @@ class ModuleController extends Controller
 
     public function saveProduct(Request $request, ?string $product = null)
     {
-        $this->ensureProductImageColumns();
-        $this->ensureSubcategoryTables();
-        $this->ensureProductDetailsTable();
-
         $data = $request->validate([
             'category_code' => ['required', 'exists:category,category_code'],
             'subcategory_id' => ['nullable', 'integer', 'exists:subcategory,subcategory_id'],
@@ -213,14 +274,21 @@ class ModuleController extends Controller
         return redirect()->route('admin.products.index')->with('status', 'Product deleted.');
     }
 
-    public function categories()
+    public function categories(Request $request)
     {
-        $this->ensureSubcategoryTables();
-        $rows = DB::table('category')->orderBy('category_code')->get();
+        $search = trim((string) $request->query('search', $request->query('q', '')));
+        $query = DB::table('category')->orderBy('category_code');
+        if ($search !== '') {
+            $query->where(function ($filter) use ($search) {
+                $filter->where('category_code', 'like', '%' . $search . '%')
+                    ->orWhere('category_name', 'like', '%' . $search . '%');
+            });
+        }
+        $rows = $query->get();
 
         return view('admin.modules.table', [
             'title' => 'Categories',
-            'subtitle' => 'Product categories with their required 2-digit product code.',
+            'subtitle' => $search !== '' ? 'Showing categories matching: ' . $search : 'Product categories with their required 2-digit product code.',
             'icon' => 'bi-tags',
             'actionLabel' => 'Add Category',
             'actionRoute' => route('admin.categories.create'),
@@ -237,7 +305,6 @@ class ModuleController extends Controller
 
     public function categoryForm(?string $category = null)
     {
-        $this->ensureSubcategoryTables();
         $record = $category ? DB::table('category')->where('category_code', $category)->first() : null;
         abort_if($category && ! $record, 404);
         $subcategories = $record
@@ -249,7 +316,6 @@ class ModuleController extends Controller
 
     public function saveCategory(Request $request, ?string $category = null)
     {
-        $this->ensureSubcategoryTables();
         $data = $request->validate($category ? [
             'category_name' => ['required', 'string', 'max:60', 'unique:category,category_name,' . $category . ',category_code'],
         ] : [
@@ -286,7 +352,6 @@ class ModuleController extends Controller
 
     public function saveSubcategory(Request $request, string $category)
     {
-        $this->ensureSubcategoryTables();
         abort_unless(DB::table('category')->where('category_code', $category)->exists(), 404);
 
         $data = $request->validate([
@@ -303,7 +368,6 @@ class ModuleController extends Controller
 
     public function deleteSubcategory(int $subcategory)
     {
-        $this->ensureSubcategoryTables();
         DB::table('product')->where('subcategory_id', $subcategory)->update(['subcategory_id' => null]);
         DB::table('subcategory')->where('subcategory_id', $subcategory)->delete();
 
@@ -365,6 +429,15 @@ class ModuleController extends Controller
             $query->where('orders.order_status', $request->status);
         }
 
+        if ($request->filled('search')) {
+            $search = trim($request->query('search'));
+            $query->where(function ($filter) use ($search) {
+                $filter->where('order_item.order_number', 'like', '%' . $search . '%')
+                    ->orWhere('customer.full_name', 'like', '%' . $search . '%')
+                    ->orWhere('product.product_name', 'like', '%' . $search . '%');
+            });
+        }
+
         $rows = $query->orderByDesc('orders.order_date')->limit(50)->get();
 
         return view('admin.modules.table', [
@@ -412,13 +485,22 @@ class ModuleController extends Controller
         return view('admin.modules.order-detail', compact('header', 'items', 'payment', 'dispatch'));
     }
 
-    public function employees()
+    public function employees(Request $request)
     {
-        $rows = DB::table('employee')->orderByDesc('created_at')->get();
+        $search = trim((string) $request->query('search', $request->query('q', '')));
+        $query = DB::table('employee')->orderByDesc('created_at');
+        if ($search !== '') {
+            $query->where(function ($filter) use ($search) {
+                $filter->where('full_name', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%')
+                    ->orWhere('phone', 'like', '%' . $search . '%');
+            });
+        }
+        $rows = $query->get();
 
         return view('admin.modules.table', [
             'title' => 'Employees',
-            'subtitle' => 'Admin-created employee accounts. Employees change their own passwords.',
+            'subtitle' => $search !== '' ? 'Showing employees matching: ' . $search : 'Admin-created employee accounts. Employees change their own passwords.',
             'icon' => 'bi-person-badge',
             'actionLabel' => 'Add Employee',
             'actionRoute' => route('admin.employees.create'),
@@ -429,17 +511,22 @@ class ModuleController extends Controller
                 $row->phone ?? '-',
                 ucfirst($row->status),
                 date('d M Y', strtotime($row->created_at)),
-                $row->status === 'active'
-                    ? '<form method="POST" action="' . route('admin.employees.deactivate', $row->employee_id) . '" class="inline-action-form">' . csrf_field() . '<button class="table-btn-action" title="Deactivate"><i class="bi bi-person-x"></i></button></form>'
-                    : '<form method="POST" action="' . route('admin.employees.activate', $row->employee_id) . '" class="inline-action-form">' . csrf_field() . '<button class="table-btn-action" title="Reactivate"><i class="bi bi-person-check"></i></button></form>',
+                '<div class="action-row"><a href="' . route('admin.employees.edit', $row->employee_id) . '" class="table-btn-action" title="Edit"><i class="bi bi-pencil"></i></a>' .
+                    ($row->status === 'active'
+                        ? '<form method="POST" action="' . route('admin.employees.deactivate', $row->employee_id) . '" class="inline-action-form">' . csrf_field() . '<button class="table-btn-action" title="Deactivate"><i class="bi bi-person-x"></i></button></form>'
+                        : '<form method="POST" action="' . route('admin.employees.activate', $row->employee_id) . '" class="inline-action-form">' . csrf_field() . '<button class="table-btn-action" title="Reactivate"><i class="bi bi-person-check"></i></button></form>') .
+                    '</div>',
             ]),
             'empty' => 'No employees found.',
         ]);
     }
 
-    public function employeeForm()
+    public function employeeForm(?int $employee = null)
     {
-        return view('admin.modules.employee-form');
+        $record = $employee ? DB::table('employee')->where('employee_id', $employee)->first() : null;
+        abort_if($employee && ! $record, 404);
+
+        return view('admin.modules.employee-form', compact('record'));
     }
 
     public function storeEmployee(Request $request)
@@ -464,6 +551,33 @@ class ModuleController extends Controller
         return redirect()->route('admin.employees.index')->with('status', 'Employee created.');
     }
 
+    public function updateEmployee(Request $request, int $employee)
+    {
+        $record = DB::table('employee')->where('employee_id', $employee)->first();
+        abort_unless($record, 404);
+
+        $data = $request->validate([
+            'full_name' => ['required', 'string', 'max:100', 'regex:/^[A-Za-z\s.\'-]+$/'],
+            'email' => ['required', 'email', 'max:150', 'unique:employee,email,' . $employee . ',employee_id'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'password' => ['nullable', 'string', 'min:8', 'regex:/^(?=.*[A-Za-z])(?=.*\d).+$/'],
+        ]);
+
+        $payload = [
+            'email' => $data['email'],
+            'full_name' => $data['full_name'],
+            'phone' => $data['phone'] ?? null,
+        ];
+
+        if (! empty($data['password'])) {
+            $payload['password_hash'] = Hash::make($data['password']);
+        }
+
+        DB::table('employee')->where('employee_id', $employee)->update($payload);
+
+        return redirect()->route('admin.employees.index')->with('status', 'Employee updated.');
+    }
+
     public function deactivateEmployee(int $employee)
     {
         DB::table('employee')->where('employee_id', $employee)->update(['status' => 'inactive']);
@@ -478,16 +592,22 @@ class ModuleController extends Controller
         return back()->with('status', 'Employee reactivated.');
     }
 
-    public function customers(bool $inactive = false)
+    public function customers(bool $inactive = false, ?Request $request = null)
     {
-        $rows = DB::table('customer')
-            ->where('status', $inactive ? 'inactive' : 'active')
-            ->orderByDesc('registered_at')
-            ->get();
+        $search = trim((string) ($request?->query('search', $request?->query('q', '')) ?? ''));
+        $query = DB::table('customer')->where('status', $inactive ? 'inactive' : 'active');
+        if ($search !== '') {
+            $query->where(function ($filter) use ($search) {
+                $filter->where('full_name', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%')
+                    ->orWhere('phone', 'like', '%' . $search . '%');
+            });
+        }
+        $rows = $query->orderByDesc('registered_at')->get();
 
         return view('admin.modules.table', [
             'title' => $inactive ? 'Deactivated Accounts' : 'Registered Customers',
-            'subtitle' => 'Read-only customer records for support. Admin can activate or deactivate accounts only.',
+            'subtitle' => $search !== '' ? 'Showing customers matching: ' . $search : 'Read-only customer records for support. Admin can activate or deactivate accounts only.',
             'icon' => 'bi-people',
             'columns' => ['Name', 'Email', 'Phone', 'Registered', 'Status', 'Action'],
             'rows' => $rows->map(fn ($row) => [
@@ -524,7 +644,7 @@ class ModuleController extends Controller
 
         return view('admin.modules.table', [
             'title' => ucwords(str_replace(['_', 'vpp_cod'], [' ', 'VPP / Cash on Delivery'], $method)) . ' Payments',
-            'subtitle' => $method === 'cheque' ? 'Cheque payments can be marked cleared after bank confirmation.' : 'Payment statuses are viewed from the payment records.',
+            'subtitle' => in_array($method, ['credit_card', 'cheque', 'dd'], true) ? 'Pending payments can be marked cleared after confirmation.' : 'VPP / cash on delivery payments are collected at delivery.',
             'icon' => 'bi-credit-card',
             'columns' => ['Payment ID', 'Customer', 'Amount', 'Status', 'Date', 'Action'],
             'rows' => $rows->map(fn ($row) => [
@@ -533,8 +653,8 @@ class ModuleController extends Controller
                 'PKR ' . number_format($row->amount, 2),
                 ucfirst($row->payment_status),
                 date('d M Y', strtotime($row->payment_date)),
-                $method === 'cheque' && $row->payment_status === 'pending'
-                    ? '<form method="POST" action="' . route('admin.payments.cheque.clear', $row->payment_id) . '" class="inline-action-form">' . csrf_field() . '<button class="table-btn-action" title="Mark Cleared"><i class="bi bi-check2"></i></button></form>'
+                in_array($method, ['credit_card', 'cheque', 'dd'], true) && $row->payment_status === 'pending'
+                    ? '<form method="POST" action="' . route('admin.payments.clear', $row->payment_id) . '" class="inline-action-form">' . csrf_field() . '<button class="table-btn-action" title="Mark Cleared"><i class="bi bi-check2"></i></button></form>'
                     : '<span class="text-muted-green">View only</span>',
             ]),
             'empty' => 'No payments found.',
@@ -556,7 +676,7 @@ class ModuleController extends Controller
             'title' => 'Returns & Replacements',
             'subtitle' => 'Review return and replacement requests, approve/reject, and mark refunds issued.',
             'icon' => 'bi-arrow-counterclockwise',
-            'columns' => ['Order No.', 'Product', 'Customer', 'Type', 'Reason', 'Request Date', 'Status', 'Action'],
+            'columns' => ['Order No.', 'Product', 'Customer', 'Type', 'Reason', 'Request Date', 'Refund', 'Status', 'Action'],
             'rows' => $rows->map(fn ($row) => [
                 $row->order_number,
                 $row->product_name,
@@ -564,6 +684,7 @@ class ModuleController extends Controller
                 ucfirst($row->request_type),
                 $row->reason ?? '-',
                 date('d M Y', strtotime($row->request_date)),
+                $row->refund_amount !== null ? 'PKR ' . number_format($row->refund_amount, 2) : '-',
                 ucfirst($row->status),
                 $row->status === 'requested'
                     ? '<div class="action-row"><form method="POST" action="' . route('admin.returns.approve', $row->request_id) . '" class="inline-action-form">' . csrf_field() . '<button class="table-btn-action" title="Approve"><i class="bi bi-check2"></i></button></form><form method="POST" action="' . route('admin.returns.reject', $row->request_id) . '" class="inline-action-form">' . csrf_field() . '<button class="table-btn-action delete" title="Reject"><i class="bi bi-x"></i></button></form></div>'
@@ -643,39 +764,146 @@ class ModuleController extends Controller
 
     public function clearChequePayment(int $payment)
     {
-        DB::table('payment')->where('payment_id', $payment)->where('payment_method', 'cheque')->update(['payment_status' => 'cleared']);
+        return $this->clearPayment($payment);
+    }
 
-        return back()->with('status', 'Cheque payment marked as cleared.');
+    public function clearPayment(int $payment)
+    {
+        $record = DB::table('payment')
+            ->join('orders', 'payment.order_id', '=', 'orders.order_id')
+            ->where('payment.payment_id', $payment)
+            ->select('payment.*', 'orders.order_status')
+            ->first();
+        abort_unless($record, 404);
+
+        if (! in_array($record->payment_method, ['credit_card', 'cheque', 'dd'], true)) {
+            return back()->withErrors(['payment' => 'This payment method does not need manual clearance.']);
+        }
+
+        if ($record->order_status === 'cancelled') {
+            return back()->withErrors(['payment' => 'Cancelled orders cannot be marked as payment cleared.']);
+        }
+
+        DB::transaction(function () use ($record, $payment) {
+            DB::table('payment')->where('payment_id', $payment)->update(['payment_status' => 'cleared']);
+
+            if ($record->payment_method === 'cheque') {
+                DB::table('payment_cheque')->where('payment_id', $payment)->update(['clearance_date' => now()->toDateString()]);
+            }
+
+            if ($record->payment_method === 'dd') {
+                DB::table('payment_dd')->where('payment_id', $payment)->update(['clearance_date' => now()->toDateString()]);
+            }
+
+            if ($record->payment_method === 'credit_card') {
+                DB::table('payment_credit_card')->where('payment_id', $payment)->update([
+                    'auth_code' => 'CLEARED-' . $payment,
+                ]);
+            }
+
+            DB::table('orders')
+                ->where('order_id', $record->order_id)
+                ->whereIn('order_status', ['placed', 'payment_pending'])
+                ->update(['order_status' => 'payment_cleared']);
+
+            DB::table('order_item')
+                ->where('order_id', $record->order_id)
+                ->whereIn('item_status', ['placed', 'payment_pending'])
+                ->update(['item_status' => 'payment_cleared']);
+        });
+
+        return back()->with('status', ucwords(str_replace('_', ' ', $record->payment_method)) . ' payment marked as cleared.');
     }
 
     public function approveReturn(int $request)
     {
-        DB::table('return_replace_request')->where('request_id', $request)->update([
-            'status' => 'approved',
-            'processed_by' => session('admin_id', 1),
-            'resolved_date' => now(),
-        ]);
+        $record = DB::table('return_replace_request')
+            ->join('order_item', 'return_replace_request.order_item_id', '=', 'order_item.order_item_id')
+            ->where('return_replace_request.request_id', $request)
+            ->select('return_replace_request.*', 'order_item.product_id', 'order_item.quantity', 'order_item.unit_price', 'order_item.order_id')
+            ->first();
+        abort_unless($record, 404);
 
-        return back()->with('status', 'Request approved.');
+        if ($record->status !== 'requested') {
+            return back()->withErrors(['return' => 'This request has already been reviewed.']);
+        }
+
+        DB::transaction(function () use ($record, $request) {
+            $isReturn = $record->request_type === 'return';
+            $refundAmount = $isReturn ? ((float) $record->unit_price * (int) $record->quantity) : null;
+
+            DB::table('return_replace_request')->where('request_id', $request)->update([
+                'status' => 'completed',
+                'refund_amount' => $refundAmount,
+                'processed_by' => null,
+                'resolved_date' => now(),
+            ]);
+
+            DB::table('order_item')->where('order_item_id', $record->order_item_id)->update([
+                'item_status' => $isReturn ? 'returned' : 'replaced',
+            ]);
+
+            if ($isReturn) {
+                $this->restoreStock($record->product_id, (int) $record->quantity);
+            }
+        });
+
+        return back()->with('status', ucfirst($record->request_type) . ' request completed.');
     }
 
     public function rejectReturn(int $request)
     {
-        DB::table('return_replace_request')->where('request_id', $request)->update([
-            'status' => 'rejected',
-            'processed_by' => session('admin_id', 1),
-            'resolved_date' => now(),
-        ]);
+        $record = DB::table('return_replace_request')
+            ->join('order_item', 'return_replace_request.order_item_id', '=', 'order_item.order_item_id')
+            ->where('return_replace_request.request_id', $request)
+            ->select('return_replace_request.*', 'order_item.item_status')
+            ->first();
+        abort_unless($record, 404);
+
+        if ($record->status !== 'requested') {
+            return back()->withErrors(['return' => 'This request has already been reviewed.']);
+        }
+
+        DB::transaction(function () use ($record, $request) {
+            DB::table('return_replace_request')->where('request_id', $request)->update([
+                'status' => 'rejected',
+                'processed_by' => session('admin_id', 1),
+                'resolved_date' => now(),
+            ]);
+
+            DB::table('order_item')
+                ->where('order_item_id', $record->order_item_id)
+                ->whereIn('item_status', ['return_requested', 'replace_requested'])
+                ->update(['item_status' => 'delivered']);
+        });
 
         return back()->with('status', 'Request rejected.');
     }
 
     public function markFeedbackReviewed(int $feedback)
     {
-        $this->ensureFeedbackReviewedColumn();
         DB::table('feedback')->where('feedback_id', $feedback)->update(['reviewed_at' => now()]);
 
         return back()->with('status', 'Feedback marked as reviewed.');
+    }
+
+    private function restoreStock(string $productId, int $quantity): void
+    {
+        if ($quantity <= 0) {
+            return;
+        }
+
+        $updated = DB::table('stock')
+            ->where('product_id', $productId)
+            ->increment('quantity_available', $quantity, ['last_restocked_at' => now()]);
+
+        if (! $updated) {
+            DB::table('stock')->insert([
+                'product_id' => $productId,
+                'quantity_available' => $quantity,
+                'last_restocked_at' => now(),
+            ]);
+        }
     }
 
     public function faqForm(?int $faq = null)
@@ -716,60 +944,6 @@ class ModuleController extends Controller
         DB::table('faq')->where('faq_id', $faq)->delete();
 
         return back()->with('status', 'FAQ deleted.');
-    }
-
-    private function ensureFeedbackReviewedColumn(): void
-    {
-        $hasColumn = DB::select("SHOW COLUMNS FROM feedback LIKE 'reviewed_at'");
-
-        if (! $hasColumn) {
-            DB::statement('ALTER TABLE feedback ADD reviewed_at DATETIME NULL');
-        }
-    }
-
-    private function ensureProductImageColumns(): void
-    {
-        if (! DB::select("SHOW COLUMNS FROM product LIKE 'image_front'")) {
-            DB::statement('ALTER TABLE product ADD image_front VARCHAR(255) NULL AFTER price');
-        }
-
-        if (! DB::select("SHOW COLUMNS FROM product LIKE 'image_hover'")) {
-            DB::statement('ALTER TABLE product ADD image_hover VARCHAR(255) NULL AFTER image_front');
-        }
-    }
-
-    private function ensureSubcategoryTables(): void
-    {
-        if (! DB::select("SHOW TABLES LIKE 'subcategory'")) {
-            DB::statement('CREATE TABLE subcategory (
-                subcategory_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                category_code CHAR(2) NOT NULL,
-                subcategory_name VARCHAR(80) NOT NULL,
-                UNIQUE KEY unique_category_subcategory (category_code, subcategory_name),
-                CONSTRAINT fk_subcategory_category FOREIGN KEY (category_code) REFERENCES category(category_code) ON DELETE CASCADE
-            ) ENGINE=InnoDB');
-        }
-
-        if (! DB::select("SHOW COLUMNS FROM product LIKE 'subcategory_id'")) {
-            DB::statement('ALTER TABLE product ADD subcategory_id BIGINT UNSIGNED NULL AFTER category_code');
-        }
-    }
-
-    private function ensureProductDetailsTable(): void
-    {
-        if (! DB::select("SHOW TABLES LIKE 'product_detail'")) {
-            DB::statement('CREATE TABLE product_detail (
-                detail_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                product_id CHAR(7) NOT NULL,
-                title VARCHAR(160) NOT NULL,
-                body TEXT NOT NULL,
-                display_order INT NOT NULL DEFAULT 0,
-                created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                INDEX product_detail_product_id_index (product_id),
-                CONSTRAINT fk_product_detail_product FOREIGN KEY (product_id) REFERENCES product(product_id) ON DELETE CASCADE
-            ) ENGINE=InnoDB');
-        }
     }
 
     private function saveProductDetails(Request $request, string $productId): void

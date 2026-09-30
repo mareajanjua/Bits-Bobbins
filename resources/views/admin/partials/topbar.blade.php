@@ -30,14 +30,16 @@
       </div>
 
       <!-- Mid navbar: search pill -->
-      <div class="navbar-search-wrapper">
+      <form class="navbar-search-wrapper" method="GET" action="{{ session('employee_id') ? route('employee.orders') : route('admin.search') }}">
         <input type="text" class="navbar-search-input"
-          placeholder="{{ session('employee_id') ? 'Search assigned orders, dispatch, delivery...' : 'Search products, orders, customers, Product ID, Order Number...' }}"
+          name="q"
+          value="{{ request('q', request('search')) }}"
+          placeholder="{{ session('employee_id') ? 'Search orders, customers, products...' : 'Search products, IDs, categories, orders, customers...' }}"
           id="main-search">
-        <button class="navbar-search-btn" aria-label="Search">
+        <button class="navbar-search-btn" type="submit" aria-label="Search">
           <i class="bi bi-search"></i>
         </button>
-      </div>
+      </form>
 
       <!-- Right actions -->
       <div class="navbar-actions">
@@ -45,7 +47,6 @@
         <button class="navbar-action-btn me-1" aria-label="Toggle Fullscreen" id="btn-fullscreen">
           <i class="bi bi-arrows-fullscreen"></i>
         </button>
-        @if (! session('employee_id'))
         <div class="dropdown">
           <button class="navbar-action-btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
             aria-expanded="false" id="btn-notifications" data-bs-auto-close="outside">
@@ -80,10 +81,9 @@
                 </div>
               @endforelse
             </div>
-            <a href="{{ route('admin.dashboard') }}" class="notification-footer">View Dashboard</a>
+            <a href="{{ session('employee_id') ? route('employee.dashboard') : route('admin.dashboard') }}" class="notification-footer">View Dashboard</a>
           </div>
         </div>
-        @endif
 
         <!-- Profile Dropdown -->
         <div class="dropdown ms-2">

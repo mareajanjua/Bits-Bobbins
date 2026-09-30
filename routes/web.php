@@ -38,6 +38,7 @@ Route::prefix('employee')->name('employee.')->middleware('employee.session')->gr
 Route::get('/home', [StorefrontController::class, 'home'])->name('store.home');
 Route::redirect('/shop', '/home');
 Route::get('/about', [StorefrontController::class, 'about'])->name('store.about');
+Route::get('/faq', [StorefrontController::class, 'faqPage'])->name('store.faq');
 Route::get('/products', [StorefrontController::class, 'products'])->name('store.products');
 Route::get('/products/{product}', [StorefrontController::class, 'product'])->name('store.product');
 Route::get('/cart', [StorefrontController::class, 'cart'])->name('cart.index');
@@ -50,10 +51,10 @@ Route::post('/register', [StorefrontController::class, 'register'])->name('custo
 Route::get('/forgot-password', [StorefrontController::class, 'forgotPasswordForm'])->name('customer.password.request');
 Route::post('/forgot-password', [StorefrontController::class, 'forgotPassword'])->name('customer.password.email');
 Route::post('/logout', [StorefrontController::class, 'logout'])->name('customer.logout');
-Route::get('/checkout', [StorefrontController::class, 'checkout'])->name('checkout.index');
-Route::post('/checkout/place-order', [StorefrontController::class, 'placeOrder'])->name('checkout.place');
 
 Route::middleware('customer.session')->group(function () {
+    Route::get('/checkout', [StorefrontController::class, 'checkout'])->name('checkout.index');
+    Route::post('/checkout/place-order', [StorefrontController::class, 'placeOrder'])->name('checkout.place');
     Route::get('/account', [StorefrontController::class, 'account'])->name('customer.account');
     Route::post('/account/profile', [StorefrontController::class, 'updateCustomerProfile'])->name('customer.profile.update');
     Route::post('/account/password', [StorefrontController::class, 'updateCustomerPassword'])->name('customer.password.update');
@@ -75,6 +76,7 @@ Route::post('/admin/logout', [AuthController::class, 'logout'])->name('admin.log
 Route::get('/admin/dashboard', [DashboardController::class, 'index'])->middleware('admin.session')->name('admin.dashboard');
 
 Route::prefix('admin')->name('admin.')->middleware('admin.session')->group(function () {
+    Route::get('/search', [ModuleController::class, 'search'])->name('search');
     Route::get('/account', [AccountController::class, 'show'])->name('account');
     Route::post('/account', [AccountController::class, 'updateProfile'])->name('account.update');
     Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.password');
@@ -101,12 +103,15 @@ Route::prefix('admin')->name('admin.')->middleware('admin.session')->group(funct
     Route::get('/employees', [ModuleController::class, 'employees'])->name('employees.index');
     Route::get('/employees/create', [ModuleController::class, 'employeeForm'])->name('employees.create');
     Route::post('/employees', [ModuleController::class, 'storeEmployee'])->name('employees.store');
+    Route::get('/employees/{employee}/edit', [ModuleController::class, 'employeeForm'])->name('employees.edit');
+    Route::post('/employees/{employee}', [ModuleController::class, 'updateEmployee'])->name('employees.update');
     Route::post('/employees/{employee}/deactivate', [ModuleController::class, 'deactivateEmployee'])->name('employees.deactivate');
     Route::post('/employees/{employee}/activate', [ModuleController::class, 'activateEmployee'])->name('employees.activate');
-    Route::get('/customers', fn (ModuleController $controller) => $controller->customers(false))->name('customers.index');
-    Route::get('/customers/deactivated', fn (ModuleController $controller) => $controller->customers(true))->name('customers.deactivated');
+    Route::get('/customers', fn (Illuminate\Http\Request $request, ModuleController $controller) => $controller->customers(false, $request))->name('customers.index');
+    Route::get('/customers/deactivated', fn (Illuminate\Http\Request $request, ModuleController $controller) => $controller->customers(true, $request))->name('customers.deactivated');
     Route::get('/customers/{customer}', [ModuleController::class, 'customerDetail'])->name('customers.show');
     Route::get('/payments/{method}', [ModuleController::class, 'payments'])->whereIn('method', ['credit_card', 'cheque', 'vpp_cod', 'dd'])->name('payments.method');
+    Route::post('/payments/{payment}/clear', [ModuleController::class, 'clearPayment'])->name('payments.clear');
     Route::post('/payments/{payment}/clear-cheque', [ModuleController::class, 'clearChequePayment'])->name('payments.cheque.clear');
     Route::get('/returns', [ModuleController::class, 'returns'])->name('returns.index');
     Route::post('/returns/{request}/approve', [ModuleController::class, 'approveReturn'])->name('returns.approve');

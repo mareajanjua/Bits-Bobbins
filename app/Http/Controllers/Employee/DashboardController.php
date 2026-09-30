@@ -60,7 +60,10 @@ class DashboardController extends Controller
         if ($request->filled('q')) {
             $query->where(function ($inner) use ($request) {
                 $inner->where('order_item.order_number', 'like', '%' . $request->q . '%')
-                    ->orWhere('customer.full_name', 'like', '%' . $request->q . '%');
+                    ->orWhere('customer.full_name', 'like', '%' . $request->q . '%')
+                    ->orWhere('customer.email', 'like', '%' . $request->q . '%')
+                    ->orWhere('product.product_name', 'like', '%' . $request->q . '%')
+                    ->orWhere('delivery_type.delivery_name', 'like', '%' . $request->q . '%');
             });
         }
 
@@ -127,9 +130,16 @@ class DashboardController extends Controller
 
         $record = DB::table('order_item')
             ->join('orders', 'order_item.order_id', '=', 'orders.order_id')
+            ->join('product', 'order_item.product_id', '=', 'product.product_id')
             ->leftJoin('payment', 'orders.order_id', '=', 'payment.order_id')
             ->where('order_item.order_item_id', $item)
-            ->select('order_item.*', DB::raw('COALESCE(payment.payment_method, "vpp_cod") as payment_method'), DB::raw('COALESCE(payment.payment_status, "pending") as payment_status'))
+            ->select(
+                'order_item.*',
+                'product.has_warranty',
+                'product.warranty_months',
+                DB::raw('COALESCE(payment.payment_method, "vpp_cod") as payment_method'),
+                DB::raw('COALESCE(payment.payment_status, "pending") as payment_status')
+            )
             ->first();
         abort_unless($record, 404);
 
@@ -137,11 +147,30 @@ class DashboardController extends Controller
             return back()->withErrors(['status' => 'This order was updated by someone else. Please refresh before saving.']);
         }
 
-        if ($data['status'] === 'dispatched' && in_array($record->payment_method, ['credit_card', 'cheque']) && $record->payment_status !== 'cleared') {
-            return back()->withErrors(['status' => 'Credit card and cheque orders cannot be dispatched until payment is cleared.']);
+        if (in_array($data['status'], ['dispatched', 'delivered'], true) && in_array($record->payment_method, ['credit_card', 'cheque', 'dd'], true) && $record->payment_status !== 'cleared') {
+            return back()->withErrors(['status' => 'Credit card, cheque, and demand draft orders cannot be dispatched until payment is cleared.']);
         }
 
         DB::table('order_item')->where('order_item_id', $item)->update(['item_status' => $data['status']]);
+
+        if ($data['status'] === 'delivered' && $record->payment_method === 'vpp_cod') {
+            $hasPendingItems = DB::table('order_item')
+                ->where('order_id', $record->order_id)
+                ->where('item_status', '!=', 'delivered')
+                ->exists();
+
+            if (! $hasPendingItems) {
+                DB::table('payment')
+                    ->where('order_id', $record->order_id)
+                    ->where('payment_method', 'vpp_cod')
+                    ->where('payment_status', 'pending')
+                    ->update([
+                        'payment_status' => 'cleared',
+                        'payment_date' => now(),
+                    ]);
+            }
+        }
+
         DB::table('orders')->where('order_id', $record->order_id)->update(['order_status' => $data['status']]);
 
         DB::table('dispatch')->updateOrInsert(
@@ -155,7 +184,30 @@ class DashboardController extends Controller
             ]
         );
 
+        if ($data['status'] === 'delivered' && (bool) $record->has_warranty) {
+            $this->createWarrantyCard($item, (int) $record->warranty_months, $data['actual_delivery_date'] ?? now()->toDateString());
+        }
+
         return back()->with('status', 'Order delivery status updated.');
+    }
+
+    private function createWarrantyCard(int $orderItemId, int $warrantyMonths, string $startDate): void
+    {
+        if ($warrantyMonths <= 0) {
+            return;
+        }
+
+        $start = \Carbon\Carbon::parse($startDate)->toDateString();
+        $end = \Carbon\Carbon::parse($startDate)->addMonths($warrantyMonths)->toDateString();
+
+        DB::table('warranty_card')->updateOrInsert(
+            ['order_item_id' => $orderItemId],
+            [
+                'warranty_start_date' => $start,
+                'warranty_end_date' => $end,
+                'terms' => 'Warranty coverage is valid for ' . $warrantyMonths . ' month(s) from delivery date.',
+            ]
+        );
     }
 
     public function deliveryQueue(Request $request, string $type)
@@ -218,7 +270,6 @@ class DashboardController extends Controller
 
     public function account()
     {
-        $this->ensureEmployeeProfilePhotoColumn();
         $employee = DB::table('employee')->where('employee_id', session('employee_id'))->first();
         abort_unless($employee, 404);
 
@@ -227,8 +278,6 @@ class DashboardController extends Controller
 
     public function updateProfile(Request $request)
     {
-        $this->ensureEmployeeProfilePhotoColumn();
-
         $request->validate([
             'profile_photo' => ['required', 'image', 'max:2048'],
         ]);
@@ -270,12 +319,4 @@ class DashboardController extends Controller
         return back()->with('status', 'Password changed.');
     }
 
-    private function ensureEmployeeProfilePhotoColumn(): void
-    {
-        $hasColumn = DB::select("SHOW COLUMNS FROM employee LIKE 'profile_photo'");
-
-        if (! $hasColumn) {
-            DB::statement('ALTER TABLE employee ADD profile_photo VARCHAR(255) NULL');
-        }
-    }
 }

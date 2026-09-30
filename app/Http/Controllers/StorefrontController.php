@@ -5,16 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class StorefrontController extends Controller
 {
     private function productsQuery(Request $request)
     {
-        $this->ensureProductImageColumns();
-        $this->ensureSubcategoryTables();
-
         $query = DB::table('product')
             ->join('category', 'product.category_code', '=', 'category.category_code')
             ->leftJoin('subcategory', 'product.subcategory_id', '=', 'subcategory.subcategory_id')
@@ -72,15 +69,11 @@ class StorefrontController extends Controller
 
     private function subcategories()
     {
-        $this->ensureSubcategoryTables();
-
         return DB::table('subcategory')->orderBy('subcategory_name')->get();
     }
 
     private function cartItems()
     {
-        $this->ensureProductImageColumns();
-
         $cart = session('cart', []);
         if (! $cart) {
             return collect();
@@ -158,6 +151,22 @@ class StorefrontController extends Controller
         return view('store.about', compact('feedback', 'faqs'));
     }
 
+    public function faqPage(Request $request)
+    {
+        $search = trim((string) $request->query('q', ''));
+        $faqQuery = DB::table('faq')->orderBy('display_order');
+        if ($search !== '') {
+            $faqQuery->where(function ($query) use ($search) {
+                $query->where('question', 'like', '%' . $search . '%')
+                    ->orWhere('answer', 'like', '%' . $search . '%');
+            });
+        }
+
+        $faqs = $faqQuery->get();
+
+        return view('store.faq', compact('faqs', 'search'));
+    }
+
     public function products(Request $request)
     {
         $categories = $this->categories();
@@ -169,11 +178,6 @@ class StorefrontController extends Controller
 
     public function product(string $product)
     {
-        $this->ensureProductImageColumns();
-        $this->ensureSubcategoryTables();
-        $this->ensureProductDetailsTable();
-        $this->ensureFeedbackProductColumn();
-
         $record = DB::table('product')
             ->join('category', 'product.category_code', '=', 'category.category_code')
             ->leftJoin('subcategory', 'product.subcategory_id', '=', 'subcategory.subcategory_id')
@@ -223,9 +227,31 @@ class StorefrontController extends Controller
     public function addToCart(Request $request, string $product)
     {
         $request->validate(['quantity' => ['nullable', 'integer', 'min:1']]);
-        abort_unless(DB::table('product')->where('product_id', $product)->where('is_active', 1)->exists(), 404);
+        $record = DB::table('product')
+            ->leftJoin('stock', 'product.product_id', '=', 'stock.product_id')
+            ->where('product.product_id', $product)
+            ->where('product.is_active', 1)
+            ->select('product.product_id', 'product.product_name', DB::raw('COALESCE(stock.quantity_available, 0) as stock_qty'))
+            ->first();
+        abort_unless($record, 404);
+
         $cart = session('cart', []);
-        $cart[$product] = ($cart[$product] ?? 0) + (int) $request->input('quantity', 1);
+        $requestedQuantity = (int) $request->input('quantity', 1);
+        $newQuantity = ($cart[$product] ?? 0) + $requestedQuantity;
+
+        if ($newQuantity > (int) $record->stock_qty) {
+            $message = $record->stock_qty > 0
+                ? 'Only ' . $record->stock_qty . ' item(s) are available for ' . $record->product_name . '.'
+                : $record->product_name . ' is out of stock.';
+
+            if ($request->expectsJson()) {
+                return response()->json(['status' => $message, 'cart_count' => collect($cart)->sum()], 422);
+            }
+
+            return back()->withErrors(['cart' => $message]);
+        }
+
+        $cart[$product] = $newQuantity;
         session(['cart' => $cart]);
 
         if ($request->expectsJson()) {
@@ -242,6 +268,24 @@ class StorefrontController extends Controller
         if ((int) $request->quantity === 0) {
             unset($cart[$product]);
         } else {
+            $record = DB::table('product')
+                ->leftJoin('stock', 'product.product_id', '=', 'stock.product_id')
+                ->where('product.product_id', $product)
+                ->where('product.is_active', 1)
+                ->select('product.product_name', DB::raw('COALESCE(stock.quantity_available, 0) as stock_qty'))
+                ->first();
+            abort_unless($record, 404);
+
+            if ((int) $request->quantity > (int) $record->stock_qty) {
+                $message = 'Only ' . $record->stock_qty . ' item(s) are available for ' . $record->product_name . '.';
+
+                if ($request->expectsJson()) {
+                    return response()->json(['status' => $message, 'cart_count' => collect($cart)->sum()], 422);
+                }
+
+                return back()->withErrors(['cart' => $message]);
+            }
+
             $cart[$product] = (int) $request->quantity;
         }
         session(['cart' => $cart]);
@@ -368,11 +412,29 @@ class StorefrontController extends Controller
 
     public function forgotPassword(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'email' => ['required', 'email', 'max:150'],
+            'role' => ['required', Rule::in(['customer', 'employee'])],
+            'password' => ['required', 'confirmed', 'min:8', 'regex:/^(?=.*[A-Za-z])(?=.*\d).+$/'],
         ]);
 
-        return back()->with('status', 'If that email is registered, contact support from the footer to complete the reset. Automated reset email is not configured yet.');
+        $table = $data['role'] === 'employee' ? 'employee' : 'customer';
+        $key = $data['role'] === 'employee' ? 'employee_id' : 'customer_id';
+
+        $account = DB::table($table)
+            ->where('email', $data['email'])
+            ->where('status', 'active')
+            ->first();
+
+        if (! $account) {
+            return back()->withErrors(['email' => 'No active account was found for that email and role.'])->withInput();
+        }
+
+        DB::table($table)->where($key, $account->{$key})->update([
+            'password_hash' => Hash::make($data['password']),
+        ]);
+
+        return redirect()->route('customer.login')->with('status', 'Password reset successfully. You can sign in with your new password.');
     }
 
     public function logout()
@@ -390,8 +452,6 @@ class StorefrontController extends Controller
             return redirect()->route('customer.login')->with('status', 'Please log in or create an account before checkout.');
         }
 
-        $this->ensurePaymentSupportsDd();
-        $this->ensureDeliveryTypes();
         $items = $this->cartItems();
         if ($items->isEmpty()) {
             return redirect()->route('cart.index')->with('status', 'Your cart is empty.');
@@ -409,7 +469,6 @@ class StorefrontController extends Controller
 
     public function account()
     {
-        $this->ensureCustomerProfilePhotoColumn();
         $customerId = session('customer_id');
         $customer = DB::table('customer')->where('customer_id', $customerId)->first();
         abort_unless($customer, 404);
@@ -428,8 +487,6 @@ class StorefrontController extends Controller
 
     public function updateCustomerProfile(Request $request)
     {
-        $this->ensureCustomerProfilePhotoColumn();
-
         $request->validate([
             'profile_photo' => ['required', 'image', 'max:2048'],
         ]);
@@ -479,18 +536,12 @@ class StorefrontController extends Controller
             return redirect()->route('customer.login')->with('status', 'Please log in or create an account before placing an order.');
         }
 
-        $this->ensurePaymentSupportsDd();
-        $this->ensureDeliveryTypes();
-        $this->ensureFeedbackProductColumn();
         $items = $this->cartItems();
         if ($items->isEmpty()) {
             return redirect()->route('cart.index');
         }
 
         $data = $request->validate([
-            'guest_name' => [Rule::requiredIf(! session('customer_id')), 'nullable', 'string', 'max:100', 'regex:/^[A-Za-z\s.\'-]+$/'],
-            'guest_email' => [Rule::requiredIf(! session('customer_id')), 'nullable', 'email', 'max:150'],
-            'guest_phone' => ['nullable', 'string', 'max:20'],
             'address_id' => ['nullable', 'integer'],
             'address_line1' => ['required_without:address_id', 'nullable', 'string', 'max:150'],
             'address_line2' => ['nullable', 'string', 'max:150'],
@@ -511,98 +562,116 @@ class StorefrontController extends Controller
         ]);
 
         $customerId = session('customer_id');
-        if (! $customerId) {
-            $existingCustomer = DB::table('customer')
-                ->where('email', $data['guest_email'])
-                ->first();
 
-            if ($existingCustomer) {
-                return back()
-                    ->withErrors(['guest_email' => 'An account already exists for this email. Please sign in to checkout with it.'])
-                    ->withInput();
+        $orderId = DB::transaction(function () use ($data, $items, $customerId) {
+            $productIds = $items->map(fn ($item) => $item->product->product_id)->values();
+            $stockRows = DB::table('stock')
+                ->whereIn('product_id', $productIds)
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('product_id');
+
+            foreach ($items as $item) {
+                $stock = $stockRows->get($item->product->product_id);
+                $available = (int) ($stock->quantity_available ?? 0);
+
+                if ($available < $item->quantity) {
+                    throw ValidationException::withMessages([
+                        'cart' => 'Only ' . $available . ' item(s) are available for ' . $item->product->product_name . '. Please update your cart.',
+                    ]);
+                }
             }
 
-            $customerId = DB::table('customer')->insertGetId([
-                'email' => $data['guest_email'],
-                'password_hash' => Hash::make(Str::random(32)),
-                'full_name' => $data['guest_name'],
-                'phone' => $data['guest_phone'] ?? null,
-                'status' => 'active',
-                'registered_at' => now(),
-            ]);
-        }
+            $addressId = $data['address_id'] ?? null;
+            if ($addressId) {
+                $ownsAddress = DB::table('customer_address')
+                    ->where('address_id', $addressId)
+                    ->where('customer_id', $customerId)
+                    ->exists();
 
-        $addressId = $data['address_id'] ?? null;
-        if (! $addressId) {
-            $addressId = DB::table('customer_address')->insertGetId([
+                if (! $ownsAddress) {
+                    throw ValidationException::withMessages([
+                        'address_id' => 'Please choose one of your saved addresses or enter a new address.',
+                    ]);
+                }
+            }
+
+            if (! $addressId) {
+                $addressId = DB::table('customer_address')->insertGetId([
+                    'customer_id' => $customerId,
+                    'address_line1' => $data['address_line1'],
+                    'address_line2' => $data['address_line2'] ?? null,
+                    'city' => $data['city'],
+                    'state' => $data['state'],
+                    'postal_code' => $data['postal_code'],
+                    'is_default' => 0,
+                ]);
+            }
+
+            $orderStatus = $data['payment_method'] === 'vpp_cod' ? 'placed' : 'payment_pending';
+            $orderId = DB::table('orders')->insertGetId([
                 'customer_id' => $customerId,
-                'address_line1' => $data['address_line1'],
-                'address_line2' => $data['address_line2'] ?? null,
-                'city' => $data['city'],
-                'state' => $data['state'],
-                'postal_code' => $data['postal_code'],
-                'is_default' => 0,
+                'shipping_address_id' => $addressId,
+                'order_date' => now(),
+                'order_status' => $orderStatus,
             ]);
-        }
 
-        $orderStatus = $data['payment_method'] === 'vpp_cod' ? 'placed' : 'payment_pending';
-        $orderId = DB::table('orders')->insertGetId([
-            'customer_id' => $customerId,
-            'shipping_address_id' => $addressId,
-            'order_date' => now(),
-            'order_status' => $orderStatus,
-        ]);
+            $itemSequence = substr(str_pad((string) $orderId, 8, '0', STR_PAD_LEFT), -8);
+            foreach ($items as $item) {
+                DB::table('order_item')->insert([
+                    'order_id' => $orderId,
+                    'product_id' => $item->product->product_id,
+                    'delivery_code' => $data['delivery_code'],
+                    'item_sequence' => $itemSequence,
+                    'quantity' => $item->quantity,
+                    'unit_price' => $item->product->price,
+                    'item_status' => $orderStatus,
+                ]);
 
-        $nextSequence = (int) DB::table('order_item')->max('item_sequence');
-        foreach ($items as $item) {
-            $nextSequence++;
-            DB::table('order_item')->insert([
+                DB::table('stock')
+                    ->where('product_id', $item->product->product_id)
+                    ->where('quantity_available', '>=', $item->quantity)
+                    ->decrement('quantity_available', $item->quantity);
+            }
+
+            $paymentId = DB::table('payment')->insertGetId([
                 'order_id' => $orderId,
-                'product_id' => $item->product->product_id,
-                'delivery_code' => $data['delivery_code'],
-                'item_sequence' => str_pad((string) $nextSequence, 8, '0', STR_PAD_LEFT),
-                'quantity' => $item->quantity,
-                'unit_price' => $item->product->price,
-                'item_status' => $orderStatus,
+                'payment_method' => $data['payment_method'],
+                'amount' => $items->sum('line_total'),
+                'payment_status' => 'pending',
+                'payment_date' => now(),
             ]);
-            DB::table('stock')->where('product_id', $item->product->product_id)->decrement('quantity_available', $item->quantity);
-        }
 
-        $paymentId = DB::table('payment')->insertGetId([
-            'order_id' => $orderId,
-            'payment_method' => $data['payment_method'],
-            'amount' => $items->sum('line_total'),
-            'payment_status' => $data['payment_method'] === 'vpp_cod' ? 'pending' : 'pending',
-            'payment_date' => now(),
-        ]);
+            if ($data['payment_method'] === 'credit_card') {
+                DB::table('payment_credit_card')->insert([
+                    'payment_id' => $paymentId,
+                    'card_last4' => substr(preg_replace('/\D/', '', $data['card_number']), -4),
+                    'card_holder_name' => $data['card_holder_name'],
+                    'gateway_txn_ref' => 'PENDING-' . $paymentId,
+                ]);
+            }
 
-        if ($data['payment_method'] === 'credit_card') {
-            DB::table('payment_credit_card')->insert([
-                'payment_id' => $paymentId,
-                'card_last4' => substr(preg_replace('/\D/', '', $data['card_number']), -4),
-                'card_holder_name' => $data['card_holder_name'],
-                'gateway_txn_ref' => 'PENDING-' . $paymentId,
-            ]);
-        }
+            if ($data['payment_method'] === 'cheque') {
+                DB::table('payment_cheque')->insert([
+                    'payment_id' => $paymentId,
+                    'cheque_number' => $data['cheque_number'],
+                    'bank_name' => $data['bank_name'],
+                    'cheque_date' => $data['cheque_date'],
+                ]);
+            }
 
-        if ($data['payment_method'] === 'cheque') {
-            DB::table('payment_cheque')->insert([
-                'payment_id' => $paymentId,
-                'cheque_number' => $data['cheque_number'],
-                'bank_name' => $data['bank_name'],
-                'cheque_date' => $data['cheque_date'],
-            ]);
-        }
+            if ($data['payment_method'] === 'dd') {
+                DB::table('payment_dd')->insert([
+                    'payment_id' => $paymentId,
+                    'dd_number' => $data['dd_number'],
+                    'bank_name' => $data['bank_name'],
+                    'dd_date' => $data['dd_date'],
+                    'clearance_date' => null,
+                ]);
+            }
 
-        if ($data['payment_method'] === 'dd') {
-            DB::table('payment_dd')->insert([
-                'payment_id' => $paymentId,
-                'dd_number' => $data['dd_number'],
-                'bank_name' => $data['bank_name'],
-                'dd_date' => $data['dd_date'],
-                'clearance_date' => null,
-            ]);
-        }
+            return $orderId;
+        });
 
         session()->forget('cart');
         return redirect()->route('order.confirmation', $orderId);
@@ -633,8 +702,9 @@ class StorefrontController extends Controller
         $payment = DB::table('payment')->where('order_id', $order)->first();
         $dispatch = DB::table('dispatch')->whereIn('order_item_id', $items->pluck('order_item_id'))->get();
         $returnRequests = DB::table('return_replace_request')->whereIn('order_item_id', $items->pluck('order_item_id'))->get()->keyBy('order_item_id');
+        $warrantyCards = DB::table('warranty_card')->whereIn('order_item_id', $items->pluck('order_item_id'))->get()->keyBy('order_item_id');
 
-        return view('store.order-detail', compact('header', 'items', 'payment', 'dispatch', 'returnRequests'));
+        return view('store.order-detail', compact('header', 'items', 'payment', 'dispatch', 'returnRequests', 'warrantyCards'));
     }
 
     public function cancelOrderItem(int $order, int $item)
@@ -652,18 +722,40 @@ class StorefrontController extends Controller
             return back()->withErrors(['order' => 'This item can no longer be cancelled.']);
         }
 
-        DB::table('order_item')->where('order_item_id', $item)->update(['item_status' => 'cancelled']);
+        DB::transaction(function () use ($record, $item, $order) {
+            DB::table('order_item')->where('order_item_id', $item)->update(['item_status' => 'cancelled']);
+            $this->restoreStock($record->product_id, (int) $record->quantity);
 
-        $remainingActive = DB::table('order_item')
-            ->where('order_id', $order)
-            ->where('item_status', '!=', 'cancelled')
-            ->exists();
+            $remainingActive = DB::table('order_item')
+                ->where('order_id', $order)
+                ->where('item_status', '!=', 'cancelled')
+                ->exists();
 
-        if (! $remainingActive) {
-            DB::table('orders')->where('order_id', $order)->update(['order_status' => 'cancelled']);
-        }
+            if (! $remainingActive) {
+                DB::table('orders')->where('order_id', $order)->update(['order_status' => 'cancelled']);
+            }
+        });
 
         return back()->with('status', 'Order item cancelled.');
+    }
+
+    private function restoreStock(string $productId, int $quantity): void
+    {
+        if ($quantity <= 0) {
+            return;
+        }
+
+        $updated = DB::table('stock')
+            ->where('product_id', $productId)
+            ->increment('quantity_available', $quantity, ['last_restocked_at' => now()]);
+
+        if (! $updated) {
+            DB::table('stock')->insert([
+                'product_id' => $productId,
+                'quantity_available' => $quantity,
+                'last_restocked_at' => now(),
+            ]);
+        }
     }
 
     public function requestReturnReplace(Request $request, int $order, int $item)
@@ -739,8 +831,6 @@ class StorefrontController extends Controller
 
     public function feedback()
     {
-        $this->ensureFeedbackProductColumn();
-
         $purchasedItems = DB::table('order_item')
             ->join('orders', 'order_item.order_id', '=', 'orders.order_id')
             ->join('product', 'order_item.product_id', '=', 'product.product_id')
@@ -754,8 +844,6 @@ class StorefrontController extends Controller
 
     public function submitFeedback(Request $request)
     {
-        $this->ensureFeedbackProductColumn();
-
         $data = $request->validate([
             'product_id' => ['required', 'exists:product,product_id'],
             'rating' => ['required', 'integer', 'min:1', 'max:5'],
@@ -786,108 +874,6 @@ class StorefrontController extends Controller
         ]);
 
         return back()->with('status', 'Feedback submitted.');
-    }
-
-    private function ensureProductImageColumns(): void
-    {
-        if (! DB::select("SHOW COLUMNS FROM product LIKE 'image_front'")) {
-            DB::statement('ALTER TABLE product ADD image_front VARCHAR(255) NULL AFTER price');
-        }
-
-        if (! DB::select("SHOW COLUMNS FROM product LIKE 'image_hover'")) {
-            DB::statement('ALTER TABLE product ADD image_hover VARCHAR(255) NULL AFTER image_front');
-        }
-    }
-
-    private function ensureSubcategoryTables(): void
-    {
-        if (! DB::select("SHOW TABLES LIKE 'subcategory'")) {
-            DB::statement('CREATE TABLE subcategory (
-                subcategory_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                category_code CHAR(2) NOT NULL,
-                subcategory_name VARCHAR(80) NOT NULL,
-                UNIQUE KEY unique_category_subcategory (category_code, subcategory_name),
-                CONSTRAINT fk_subcategory_category FOREIGN KEY (category_code) REFERENCES category(category_code) ON DELETE CASCADE
-            ) ENGINE=InnoDB');
-        }
-
-        if (! DB::select("SHOW COLUMNS FROM product LIKE 'subcategory_id'")) {
-            DB::statement('ALTER TABLE product ADD subcategory_id BIGINT UNSIGNED NULL AFTER category_code');
-        }
-    }
-
-    private function ensureProductDetailsTable(): void
-    {
-        if (! DB::select("SHOW TABLES LIKE 'product_detail'")) {
-            DB::statement('CREATE TABLE product_detail (
-                detail_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                product_id CHAR(7) NOT NULL,
-                title VARCHAR(160) NOT NULL,
-                body TEXT NOT NULL,
-                display_order INT NOT NULL DEFAULT 0,
-                created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                INDEX product_detail_product_id_index (product_id),
-                CONSTRAINT fk_product_detail_product FOREIGN KEY (product_id) REFERENCES product(product_id) ON DELETE CASCADE
-            ) ENGINE=InnoDB');
-        }
-    }
-
-    private function ensurePaymentSupportsDd(): void
-    {
-        if (! DB::select("SHOW TABLES LIKE 'payment_dd'")) {
-            DB::statement('CREATE TABLE payment_dd (
-                payment_id BIGINT PRIMARY KEY,
-                dd_number VARCHAR(30) NOT NULL,
-                bank_name VARCHAR(100) NOT NULL,
-                dd_date DATE NOT NULL,
-                clearance_date DATE NULL,
-                CONSTRAINT fk_payment_dd_payment FOREIGN KEY (payment_id) REFERENCES payment(payment_id) ON DELETE CASCADE
-            ) ENGINE=InnoDB');
-        }
-
-        $paymentMethod = collect(DB::select("SHOW COLUMNS FROM payment LIKE 'payment_method'"))->first();
-        if ($paymentMethod && ! str_contains($paymentMethod->Type, "'dd'")) {
-            DB::statement("ALTER TABLE payment MODIFY payment_method ENUM('credit_card','cheque','vpp_cod','dd') NOT NULL");
-        }
-    }
-
-    private function ensureDeliveryTypes(): void
-    {
-        if (! DB::select("SHOW TABLES LIKE 'delivery_type'")) {
-            DB::statement('CREATE TABLE delivery_type (
-                delivery_code CHAR(1) PRIMARY KEY,
-                delivery_name VARCHAR(60) NOT NULL
-            ) ENGINE=InnoDB');
-        }
-
-        $defaults = [
-            ['delivery_code' => '1', 'delivery_name' => 'Standard Delivery'],
-            ['delivery_code' => '2', 'delivery_name' => 'Express Delivery'],
-            ['delivery_code' => '3', 'delivery_name' => 'VPP Delivery'],
-        ];
-
-        foreach ($defaults as $type) {
-            DB::table('delivery_type')->updateOrInsert(
-                ['delivery_code' => $type['delivery_code']],
-                ['delivery_name' => $type['delivery_name']]
-            );
-        }
-    }
-
-    private function ensureFeedbackProductColumn(): void
-    {
-        if (! DB::select("SHOW COLUMNS FROM feedback LIKE 'product_id'")) {
-            DB::statement('ALTER TABLE feedback ADD product_id CHAR(7) NULL AFTER order_id');
-            DB::statement('ALTER TABLE feedback ADD INDEX feedback_product_id_index (product_id)');
-        }
-    }
-
-    private function ensureCustomerProfilePhotoColumn(): void
-    {
-        if (! DB::select("SHOW COLUMNS FROM customer LIKE 'profile_photo'")) {
-            DB::statement('ALTER TABLE customer ADD profile_photo VARCHAR(255) NULL AFTER phone');
-        }
     }
 
     private function seedProductDetails(object $product): void

@@ -22,20 +22,6 @@
         <div class="store-error">{{ $errors->first() }}</div>
       @endif
 
-      @if (! session('customer_id'))
-        <section class="bb-checkout-section">
-          <div class="bb-checkout-section-title">
-            <i class="bi bi-person"></i>
-            <h2>Information</h2>
-          </div>
-          <div class="bb-checkout-fields">
-            <label><span>Full name</span><input name="guest_name" value="{{ old('guest_name') }}" required></label>
-            <label><span>Email</span><input type="email" name="guest_email" value="{{ old('guest_email') }}" required></label>
-            <label><span>Phone number</span><input name="guest_phone" value="{{ old('guest_phone') }}"></label>
-          </div>
-        </section>
-      @endif
-
       <section class="bb-checkout-section">
         <div class="bb-checkout-section-title">
           <i class="bi bi-geo-alt"></i>

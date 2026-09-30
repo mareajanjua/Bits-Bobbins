@@ -10,10 +10,6 @@
     $employee = session('employee_id') ? DB::table('employee')->where('employee_id', session('employee_id'))->first() : null;
     $frontendCategories = DB::table('category')->orderBy('category_name')->get();
     $frontendSubcategories = DB::table('subcategory')->orderBy('subcategory_name')->get()->groupBy('category_code');
-    if (! DB::select("SHOW COLUMNS FROM feedback LIKE 'product_id'")) {
-        DB::statement('ALTER TABLE feedback ADD product_id CHAR(7) NULL AFTER order_id');
-        DB::statement('ALTER TABLE feedback ADD INDEX feedback_product_id_index (product_id)');
-    }
     $latestProducts = DB::table('product')
         ->join('category', 'product.category_code', '=', 'category.category_code')
         ->leftJoin('subcategory', 'product.subcategory_id', '=', 'subcategory.subcategory_id')
@@ -51,25 +47,25 @@
         ->orderBy('display_order')
         ->get();
     $categoryImages = [
-        'art&craft' => 'assets/frontend/img/Home Page/Category/Art&Craft.png',
-        'art & craft' => 'assets/frontend/img/Home Page/Category/Art&Craft.png',
-        'bags&wallets' => 'assets/frontend/img/Home Page/Category/Bags&Wallets.png',
-        'bags & wallets' => 'assets/frontend/img/Home Page/Category/Bags&Wallets.png',
-        'beauty & skincare' => 'assets/frontend/img/Home Page/Category/Beauty & Skincare.png',
-        'beauty / accessories' => 'assets/frontend/img/Home Page/Category/Beauty & Skincare.png',
-        'dolls & accessories' => 'assets/frontend/img/Home Page/Category/Dolls & Accessories.png',
-        'dolls' => 'assets/frontend/img/Home Page/Category/Dolls & Accessories.png',
-        'gifts&stationary' => 'assets/frontend/img/Home Page/Category/Gifts&Stationary.png',
-        'gift articles' => 'assets/frontend/img/Home Page/Category/Gifts&Stationary.png',
-        'stationery / files' => 'assets/frontend/img/Home Page/Category/Gifts&Stationary.png',
-        'kids (general & lifestyle)' => 'assets/frontend/img/Home Page/Category/Kids (General & Lifestyle).png',
+        'art&craft' => 'assets/frontend/img/Home Page/Category/Art&Craft.jpg',
+        'art & craft' => 'assets/frontend/img/Home Page/Category/Art&Craft.jpg',
+        'bags&wallets' => 'assets/frontend/img/Home Page/Category/Bags&Wallets.jpg',
+        'bags & wallets' => 'assets/frontend/img/Home Page/Category/Bags&Wallets.jpg',
+        'beauty & skincare' => 'assets/frontend/img/Home Page/Category/Beauty & Skincare.jpg',
+        'beauty / accessories' => 'assets/frontend/img/Home Page/Category/Beauty & Skincare.jpg',
+        'dolls & accessories' => 'assets/frontend/img/Home Page/Category/Dolls & Accessories.jpg',
+        'dolls' => 'assets/frontend/img/Home Page/Category/Dolls & Accessories.jpg',
+        'gifts&stationary' => 'assets/frontend/img/Home Page/Category/Gifts&Stationary.jpg',
+        'gift articles' => 'assets/frontend/img/Home Page/Category/Gifts&Stationary.jpg',
+        'stationery / files' => 'assets/frontend/img/Home Page/Category/Gifts&Stationary.jpg',
+        'kids (general & lifestyle)' => 'assets/frontend/img/Home Page/Category/Kids (General & Lifestyle).jpg',
     ];
     $heroImages = [
-        'assets/frontend/img/Home Page/hero/beauty.png',
-        'assets/frontend/img/Home Page/hero/Dollhouses.png',
-        'assets/frontend/img/Home Page/hero/gifts&accessories.png',
-        'assets/frontend/img/Home Page/hero/Kids&general.png',
-        'assets/frontend/img/Home Page/hero/wallets&bags.png',
+        'assets/frontend/img/Home Page/Hero/beauty.jpg',
+        'assets/frontend/img/Home Page/Hero/Dollhouses.jpg',
+        'assets/frontend/img/Home Page/Hero/gifts&accessories.jpg',
+        'assets/frontend/img/Home Page/Hero/Kids&general.jpg',
+        'assets/frontend/img/Home Page/Hero/wallets&bags.jpg',
     ];
     $homeCart = session('cart', []);
     $homeCartItems = collect();
@@ -150,7 +146,9 @@
                             <h2 class="bb-faq-title"><span class="bb-category-sticker">Categories</span>Find Your Perfect Little World</h2>
                             <span class="bb-section-eyebrow">Discover the most loved Bits&Bobbins categories for tiny treasures, sweet gifts, and playful everyday picks.</span>
                         </div>
-                        <div class="bb-slider bb-slider--categories bb-category-slider">
+                        <div class="bb-slider-wrap bb-slider-wrap--categories bb-category-carousel-wrap">
+                            <button type="button" class="bb-product-arrow prev" data-slider-control="prev" aria-label="Previous categories"><i class="fa fa-arrow-left"></i></button>
+                            <div class="bb-slider bb-slider--categories bb-category-slider">
                             <?php if ($frontendCategories->isNotEmpty()): ?>
                             <?php foreach ($frontendCategories as $category): ?>
                                 <?php
@@ -175,6 +173,8 @@
                                     <div class="bb-preview-card text-center">No categories available yet.</div>
                                 </div>
                             <?php endif; ?>
+                            </div>
+                            <button type="button" class="bb-product-arrow next" data-slider-control="next" aria-label="Next categories"><i class="fa fa-arrow-right"></i></button>
                         </div>
                         <div class="bb-category-cta-row">
                             <a href="<?php echo e(route('store.products')); ?>" class="bb-outline-btn bb-category-cta">Explore All <i class="fa fa-arrow-right ms-2"></i></a>
@@ -196,7 +196,7 @@
                             <a href="<?php echo e(route('store.products', ['sort' => 'newest'])); ?>" class="bb-outline-btn bb-category-cta">View More <i class="fa fa-arrow-right ms-2"></i></a>
                         </div>
                         <div class="bb-slider-wrap bb-slider-wrap--products bb-product-carousel-wrap">
-                            <button type="button" class="bb-product-arrow prev" data-product-slide="prev" aria-label="Previous products"><i class="fa fa-arrow-left"></i></button>
+                            <button type="button" class="bb-product-arrow prev" data-slider-control="prev" aria-label="Previous products"><i class="fa fa-arrow-left"></i></button>
                             <div class="bb-slider bb-slider--products bb-product-slider">
                             <?php if ($latestProducts->isNotEmpty()): ?>
                             <?php foreach ($latestProducts as $product): ?>
@@ -210,7 +210,7 @@
                                 </div>
                             <?php endif; ?>
                             </div>
-                            <button type="button" class="bb-product-arrow next" data-product-slide="next" aria-label="Next products"><i class="fa fa-arrow-right"></i></button>
+                            <button type="button" class="bb-product-arrow next" data-slider-control="next" aria-label="Next products"><i class="fa fa-arrow-right"></i></button>
                         </div>
                     </div>
                 </div>
@@ -252,7 +252,7 @@
                             <a href="<?php echo e(route('store.products')); ?>" class="bb-outline-btn bb-category-cta">View More <i class="fa fa-arrow-right ms-2"></i></a>
                         </div>
                         <div class="bb-slider-wrap bb-slider-wrap--products bb-product-carousel-wrap">
-                            <button type="button" class="bb-product-arrow prev" data-product-slide="prev" aria-label="Previous best sellers"><i class="fa fa-arrow-left"></i></button>
+                            <button type="button" class="bb-product-arrow prev" data-slider-control="prev" aria-label="Previous best sellers"><i class="fa fa-arrow-left"></i></button>
                             <div class="bb-slider bb-slider--products bb-product-slider">
                             <?php if ($bestSellerProducts->isNotEmpty()): ?>
                             <?php foreach ($bestSellerProducts as $product): ?>
@@ -266,7 +266,7 @@
                                 </div>
                             <?php endif; ?>
                             </div>
-                            <button type="button" class="bb-product-arrow next" data-product-slide="next" aria-label="Next best sellers"><i class="fa fa-arrow-right"></i></button>
+                            <button type="button" class="bb-product-arrow next" data-slider-control="next" aria-label="Next best sellers"><i class="fa fa-arrow-right"></i></button>
                         </div>
                     </div>
                 </div>
@@ -282,57 +282,31 @@
                             <p class="bb-feedback-subtitle">Real words from Bits&Bobbins customers, pulled from submitted feedback.</p>
                         </div>
                         <?php if($feedbackSlides->isNotEmpty()): ?>
-                            <div class="bb-slider-wrap bb-slider-wrap--feedback bb-feedback-marquee" aria-label="Customer feedback slider">
-                                <div class="bb-feedback-track bb-feedback-track-left">
-                                    @foreach ([false, true] as $isClone)
-                                        <div class="bb-feedback-sequence" @if ($isClone) aria-hidden="true" @endif>
-                                            <?php $__currentLoopData = $feedbackTopRow; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                <article class="bb-feedback-card">
-                                                    <p class="bb-feedback-quote">&ldquo;<?php echo e(\Illuminate\Support\Str::limit($item->message, 150)); ?>&rdquo;</p>
-                                                    <div class="bb-feedback-person">
-                                                        <span class="bb-feedback-avatar">
-                                                            <?php if(! empty($item->profile_photo)): ?>
-                                                                <img src="<?php echo e(asset($item->profile_photo)); ?>" alt="<?php echo e($item->full_name); ?>">
-                                                            <?php else: ?>
-                                                                <?php echo e(strtoupper(\Illuminate\Support\Str::substr($item->full_name, 0, 1))); ?>
-                                                            <?php endif; ?>
-                                                        </span>
-                                                        <div>
-                                                            <strong><?php echo e($item->full_name); ?></strong>
-                                                            <span><?php echo e($item->rating ?? 'N/A'); ?>/5 rating<?php echo e($item->product_name ? ' - ' . $item->product_name : ''); ?></span>
-                                                        </div>
+                            <div class="bb-slider-wrap bb-slider-wrap--feedback bb-feedback-carousel-wrap" aria-label="Customer feedback slider">
+                                <button type="button" class="bb-product-arrow prev" data-slider-control="prev" aria-label="Previous feedback"><i class="fa fa-arrow-left"></i></button>
+                                <div class="bb-slider bb-feedback-slider">
+                                    @foreach ($feedbackSlides as $item)
+                                        <div class="bb-product-slide">
+                                            <article class="bb-feedback-card">
+                                                <p class="bb-feedback-quote">&ldquo;{{ \Illuminate\Support\Str::limit($item->message, 150) }}&rdquo;</p>
+                                                <div class="bb-feedback-person">
+                                                    <span class="bb-feedback-avatar">
+                                                        @if (! empty($item->profile_photo))
+                                                            <img src="{{ asset($item->profile_photo) }}" alt="{{ $item->full_name }}">
+                                                        @else
+                                                            {{ strtoupper(\Illuminate\Support\Str::substr($item->full_name, 0, 1)) }}
+                                                        @endif
+                                                    </span>
+                                                    <div>
+                                                        <strong>{{ $item->full_name }}</strong>
+                                                        <span>{{ $item->rating ?? 'N/A' }}/5 rating{{ $item->product_name ? ' - ' . $item->product_name : '' }}</span>
                                                     </div>
-                                                </article>
-                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                </div>
+                                            </article>
                                         </div>
                                     @endforeach
                                 </div>
-                                @if ($feedbackBottomRow->isNotEmpty())
-                                <div class="bb-feedback-track bb-feedback-track-right">
-                                    @foreach ([false, true] as $isClone)
-                                        <div class="bb-feedback-sequence" @if ($isClone) aria-hidden="true" @endif>
-                                            <?php $__currentLoopData = $feedbackBottomRow; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                <article class="bb-feedback-card">
-                                                    <p class="bb-feedback-quote">&ldquo;<?php echo e(\Illuminate\Support\Str::limit($item->message, 150)); ?>&rdquo;</p>
-                                                    <div class="bb-feedback-person">
-                                                        <span class="bb-feedback-avatar">
-                                                            <?php if(! empty($item->profile_photo)): ?>
-                                                                <img src="<?php echo e(asset($item->profile_photo)); ?>" alt="<?php echo e($item->full_name); ?>">
-                                                            <?php else: ?>
-                                                                <?php echo e(strtoupper(\Illuminate\Support\Str::substr($item->full_name, 0, 1))); ?>
-                                                            <?php endif; ?>
-                                                        </span>
-                                                        <div>
-                                                            <strong><?php echo e($item->full_name); ?></strong>
-                                                            <span><?php echo e($item->rating ?? 'N/A'); ?>/5 rating<?php echo e($item->product_name ? ' - ' . $item->product_name : ''); ?></span>
-                                                        </div>
-                                                    </div>
-                                                </article>
-                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                        </div>
-                                    @endforeach
-                                </div>
-                                @endif
+                                <button type="button" class="bb-product-arrow next" data-slider-control="next" aria-label="Next feedback"><i class="fa fa-arrow-right"></i></button>
                             </div>
                         <?php else: ?>
                             <div class="bb-feedback-empty">No feedback available yet.</div>
@@ -346,14 +320,10 @@
             <div class="container">
                 <div class="row">
                     <div class="col-12">
-                        <div class="bb-faq-layout">
-                            <div class="bb-faq-side">
-                                <h2 class="bb-faq-title">Got Questions?<span class="bb-faq-sticker">FAQ</span></h2>
-                                <div class="bb-faq-contact">
-                                    <h3>Still got<br>questions?</h3>
-                                    <a href="#contact" class="bb-outline-btn">Contact Us</a>
-                                </div>
-                            </div>
+                        <div class="bb-faq-heading">
+                            <h2 class="bb-faq-title"><span class="bb-faq-sticker">FAQ</span>Got Questions?</h2>
+                        </div>
+                        <div class="bb-faq-layout bb-faq-layout--stacked">
                             <div class="bb-faq-list">
                                 <?php $__empty_1 = true; $__currentLoopData = $faqPreview; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $faq): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                     <details class="bb-faq-item" <?php if($loop->first): ?> open <?php endif; ?>>
@@ -366,6 +336,10 @@
                                     </div>
                                 <?php endif; ?>
                             </div>
+                        </div>
+                        <div class="bb-faq-contact bb-faq-contact--bottom">
+                            <h3>Still got<br>questions?</h3>
+                            <a href="{{ route('store.about') }}#about-contact" class="bb-outline-btn">Contact Us</a>
                         </div>
                     </div>
                 </div>

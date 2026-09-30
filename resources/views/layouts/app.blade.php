@@ -25,25 +25,25 @@
         ->orderBy('display_order')
         ->get();
     $categoryImages = [
-        'art&craft' => 'assets/frontend/img/Home Page/Category/Art&Craft.png',
-        'art & craft' => 'assets/frontend/img/Home Page/Category/Art&Craft.png',
-        'bags&wallets' => 'assets/frontend/img/Home Page/Category/Bags&Wallets.png',
-        'bags & wallets' => 'assets/frontend/img/Home Page/Category/Bags&Wallets.png',
-        'beauty & skincare' => 'assets/frontend/img/Home Page/Category/Beauty & Skincare.png',
-        'beauty / accessories' => 'assets/frontend/img/Home Page/Category/Beauty & Skincare.png',
-        'dolls & accessories' => 'assets/frontend/img/Home Page/Category/Dolls & Accessories.png',
-        'dolls' => 'assets/frontend/img/Home Page/Category/Dolls & Accessories.png',
-        'gifts&stationary' => 'assets/frontend/img/Home Page/Category/Gifts&Stationary.png',
-        'gift articles' => 'assets/frontend/img/Home Page/Category/Gifts&Stationary.png',
-        'stationery / files' => 'assets/frontend/img/Home Page/Category/Gifts&Stationary.png',
-        'kids (general & lifestyle)' => 'assets/frontend/img/Home Page/Category/Kids (General & Lifestyle).png',
+        'art&craft' => 'assets/frontend/img/Home Page/Category/Art&Craft.jpg',
+        'art & craft' => 'assets/frontend/img/Home Page/Category/Art&Craft.jpg',
+        'bags&wallets' => 'assets/frontend/img/Home Page/Category/Bags&Wallets.jpg',
+        'bags & wallets' => 'assets/frontend/img/Home Page/Category/Bags&Wallets.jpg',
+        'beauty & skincare' => 'assets/frontend/img/Home Page/Category/Beauty & Skincare.jpg',
+        'beauty / accessories' => 'assets/frontend/img/Home Page/Category/Beauty & Skincare.jpg',
+        'dolls & accessories' => 'assets/frontend/img/Home Page/Category/Dolls & Accessories.jpg',
+        'dolls' => 'assets/frontend/img/Home Page/Category/Dolls & Accessories.jpg',
+        'gifts&stationary' => 'assets/frontend/img/Home Page/Category/Gifts&Stationary.jpg',
+        'gift articles' => 'assets/frontend/img/Home Page/Category/Gifts&Stationary.jpg',
+        'stationery / files' => 'assets/frontend/img/Home Page/Category/Gifts&Stationary.jpg',
+        'kids (general & lifestyle)' => 'assets/frontend/img/Home Page/Category/Kids (General & Lifestyle).jpg',
     ];
     $heroImages = [
-        'assets/frontend/img/Home Page/hero/beauty.png',
-        'assets/frontend/img/Home Page/hero/Dollhouses.png',
-        'assets/frontend/img/Home Page/hero/gifts&accessories.png',
-        'assets/frontend/img/Home Page/hero/Kids&general.png',
-        'assets/frontend/img/Home Page/hero/wallets&bags.png',
+        'assets/frontend/img/Home Page/Hero/beauty.jpg',
+        'assets/frontend/img/Home Page/Hero/Dollhouses.jpg',
+        'assets/frontend/img/Home Page/Hero/gifts&accessories.jpg',
+        'assets/frontend/img/Home Page/Hero/Kids&general.jpg',
+        'assets/frontend/img/Home Page/Hero/wallets&bags.jpg',
     ];
     $homeCart = session('cart', []);
     $homeCartItems = collect();
@@ -411,6 +411,8 @@
         }
 
         .bb-category-card {
+            width: 100%;
+            height: 100%;
             min-height: 0;
             padding: .9rem .9rem 1rem;
             color: #111;
@@ -479,9 +481,7 @@
             scroll-snap-type: x mandatory;
             scroll-behavior: smooth;
             justify-content: safe center;
-            cursor: grab;
             -webkit-overflow-scrolling: touch;
-            user-select: none;
             scrollbar-width: none;
         }
 
@@ -489,14 +489,14 @@
             display: none;
         }
 
-        .bb-category-slider.is-dragging {
-            cursor: grabbing;
-            scroll-snap-type: none;
+        .bb-category-carousel-wrap {
+            position: relative;
         }
 
         .bb-category-slide {
             flex: 0 0 clamp(220px, 21vw, 300px);
             scroll-snap-align: start;
+            display: flex;
         }
 
         .bb-category-cta-row {
@@ -533,8 +533,9 @@
         }
 
         .bb-product-card {
+            width: 100%;
             height: 100%;
-            min-height: 0;
+            min-height: 430px;
             overflow: hidden;
             transition: .22s ease;
             border: 3px solid #1f1c17;
@@ -598,6 +599,7 @@
             gap: .85rem;
             align-content: end;
             position: relative;
+            min-height: 145px;
         }
 
         .bb-product-body form {
@@ -708,6 +710,17 @@
             position: relative;
         }
 
+        .bb-slider-wrap {
+            position: relative;
+        }
+
+        /* No previous/next controls belong to the main hero. */
+        .bb-home-section--hero .bb-product-arrow,
+        .bb-home-section--hero .owl-nav,
+        .bb-home-section--hero .owl-dots {
+            display: none !important;
+        }
+
         .bb-product-slider {
             display: flex;
             gap: clamp(1.2rem, 2.5vw, 2rem);
@@ -715,7 +728,6 @@
             padding: .65rem .35rem 1.45rem;
             scroll-snap-type: x mandatory;
             scroll-behavior: smooth;
-            cursor: grab;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
         }
@@ -724,14 +736,10 @@
             display: none;
         }
 
-        .bb-product-slider.is-dragging {
-            cursor: grabbing;
-            scroll-snap-type: none;
-        }
-
         .bb-product-slide {
             flex: 0 0 clamp(220px, 21vw, 300px);
             scroll-snap-align: start;
+            display: flex;
         }
 
         .bb-product-arrow {
@@ -882,6 +890,10 @@
             }
 
             .bb-why-banner {
+                width: 100%;
+                max-width: 100%;
+                min-width: 0;
+                margin: 0;
                 grid-template-columns: 1fr;
                 border-radius: 26px;
                 gap: 0;
@@ -890,6 +902,7 @@
 
             .bb-why-banner-copy {
                 width: auto;
+                min-width: 0;
                 padding: 1.25rem 1rem 1.35rem;
             }
 
@@ -915,6 +928,13 @@
             .bb-why-points li {
                 align-items: flex-start;
                 gap: .65rem;
+                min-width: 0;
+            }
+
+            .bb-why-points li span {
+                min-width: 0;
+                overflow-wrap: anywhere;
+                word-break: normal;
             }
 
             .bb-why-banner-copy .bb-category-cta {
@@ -1099,11 +1119,26 @@
         }
 
         .bb-feedback-marquee {
-            display: grid;
+            position: relative;
+        }
+
+        .bb-feedback-slider {
+            display: flex;
             gap: 1rem;
-            width: 100vw;
-            margin-left: calc(50% - 50vw);
-            overflow: hidden;
+            overflow-x: auto;
+            padding: .65rem .35rem 1.45rem;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+        }
+
+        .bb-feedback-slider::-webkit-scrollbar {
+            display: none;
+        }
+
+        .bb-feedback-slider .bb-product-slide {
+            flex: 0 0 clamp(310px, 32vw, 520px);
+            scroll-snap-align: start;
         }
 
         .bb-feedback-track {
@@ -1132,7 +1167,8 @@
 
         .bb-feedback-card {
             width: clamp(310px, 32vw, 520px);
-            min-height: 210px;
+            height: 250px;
+            min-height: 250px;
             border-radius: 18px;
             border: 2px solid #1f1c17;
             background: #5E442B;
@@ -1159,6 +1195,10 @@
             margin: 0;
             font-size: clamp(1rem, 1.25vw, 1.28rem);
             line-height: 1.35;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 4;
+            overflow: hidden;
             font-weight: 400;
             font-style: italic;
         }
@@ -1230,6 +1270,16 @@
             align-items: start;
         }
 
+        .bb-faq-heading {
+            margin-bottom: clamp(1.75rem, 4vw, 3rem);
+        }
+
+        .bb-faq-layout--stacked {
+            display: block;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
         .bb-faq-title {
             font-family: "Porcelain", cursive;
             color: #111;
@@ -1279,6 +1329,11 @@
 
         .bb-faq-contact {
             margin-top: clamp(5rem, 18vw, 13rem);
+        }
+
+        .bb-faq-contact--bottom {
+            margin: clamp(2rem, 5vw, 3.5rem) auto 0;
+            text-align: center;
         }
 
         .bb-faq-contact h3 {
@@ -1755,6 +1810,11 @@
             display: none !important;
         }
 
+        .header-carousel .owl-nav,
+        .header-carousel .owl-dots {
+            display: none !important;
+        }
+
         @media (max-width: 991.98px) {
             .bb-community-card {
                 width: min(480px, calc(100vw - 1rem));
@@ -1786,8 +1846,13 @@
 
         @include('partials.footer')
 
-        <!-- Back to Top -->
-        <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+        <!-- Floating store actions -->
+        <div class="bb-floating-store-actions" aria-label="Quick actions">
+            <a href="{{ route('cart.index') }}" class="bb-floating-cart" aria-label="Open cart">
+                <i class="fa fa-shopping-bag"></i>
+                <span data-cart-count>{{ $cartCount }}</span>
+            </a>
+        </div>
     </div>
 
     <!-- JavaScript Libraries -->
@@ -1815,27 +1880,32 @@
     <script>
         (() => {
             const menu = document.getElementById("bbFullMenu");
-            const openButton = document.querySelector(".bb-menu-open");
+            const openButtons = document.querySelectorAll(".bb-menu-open");
             const closeButton = document.querySelector(".bb-menu-close");
-            if (!menu || !openButton || !closeButton) return;
+            const searchInput = menu?.querySelector(".bb-full-menu-search input");
+            if (!menu || !openButtons.length || !closeButton) return;
 
             const openMenu = () => {
                 menu.classList.add("is-open");
                 menu.setAttribute("aria-hidden", "false");
-                openButton.setAttribute("aria-expanded", "true");
+                openButtons.forEach((button) => button.setAttribute("aria-expanded", "true"));
                 document.body.classList.add("bb-menu-locked");
-                closeButton.focus();
+                if (window.matchMedia("(max-width: 991.98px)").matches && searchInput) {
+                    window.setTimeout(() => searchInput.focus(), 0);
+                } else {
+                    closeButton.focus();
+                }
             };
 
             const closeMenu = () => {
                 menu.classList.remove("is-open");
                 menu.setAttribute("aria-hidden", "true");
-                openButton.setAttribute("aria-expanded", "false");
+                openButtons.forEach((button) => button.setAttribute("aria-expanded", "false"));
                 document.body.classList.remove("bb-menu-locked");
-                openButton.focus();
+                openButtons[0].focus();
             };
 
-            openButton.addEventListener("click", openMenu);
+            openButtons.forEach((button) => button.addEventListener("click", openMenu));
             closeButton.addEventListener("click", closeMenu);
             menu.querySelectorAll("a").forEach((link) => {
                 link.addEventListener("click", closeMenu);

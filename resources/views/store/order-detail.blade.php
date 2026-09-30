@@ -19,12 +19,17 @@
           && $actualDeliveryDate
           && \Carbon\Carbon::parse($actualDeliveryDate)->startOfDay()->diffInDays(now()->startOfDay(), false) <= 7;
       $requestRecord = $returnRequests->get($item->order_item_id);
+      $warrantyCard = $warrantyCards->get($item->order_item_id);
     @endphp
     <div class="store-order-detail-row">
       <div><strong>{{ $item->product_name }}</strong><span>{{ $item->order_number }}</span></div>
       <div>Qty {{ $item->quantity }} | PKR {{ number_format($item->unit_price, 2) }}</div>
       <div>{{ ucwords(str_replace('_', ' ', $item->item_status)) }}</div>
-      @if ($item->has_warranty)<div><i class="bi bi-shield-check"></i> Warranty {{ $item->warranty_months }} months</div>@endif
+      @if ($warrantyCard)
+        <div><i class="bi bi-shield-check"></i> Warranty card: {{ \Carbon\Carbon::parse($warrantyCard->warranty_start_date)->format('d M Y') }} to {{ \Carbon\Carbon::parse($warrantyCard->warranty_end_date)->format('d M Y') }}</div>
+      @elseif ($item->has_warranty)
+        <div><i class="bi bi-shield-check"></i> Warranty {{ $item->warranty_months }} months, issued after delivery</div>
+      @endif
       @if (! in_array($item->item_status, ['dispatched', 'delivered', 'cancelled', 'return_requested', 'returned', 'replace_requested', 'replaced']))
         <form method="POST" action="{{ route('customer.orders.items.cancel', [$header->order_id, $item->order_item_id]) }}">
           @csrf

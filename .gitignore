@@ -8,6 +8,14 @@
 .env.backup
 .env.production
 .phpunit.result.cache
+storage/logs/*.log
+storage/framework/views/*.php
+bootstrap/cache/*.php
+!bootstrap/cache/.gitignore
+public/assets/frontend/uploads/
+public/assets/dashboard/uploads/
+*-submission.zip
+*.zip
 Homestead.json
 Homestead.yaml
 auth.json

@@ -21,6 +21,10 @@
 @endphp
 
 @section('content')
+@php
+  $lowStockTone = $lowStockProducts > 1 ? 'metric-red' : ($lowStockProducts === 1 ? 'metric-orange' : 'metric-green');
+  $outOfStockTone = $outOfStockProducts > 0 ? 'metric-red' : 'metric-green';
+@endphp
     <div class="page-header dashboard-overview-header">
       <div>
         <h1 class="page-title">Dashboard</h1>
@@ -213,7 +217,7 @@
                 <strong>{{ $totalActiveProducts > 0 ? $totalActiveProducts : '-' }}</strong>
               </div>
             </div>
-            <div class="dashboard-metric-row metric-orange">
+            <div class="dashboard-metric-row {{ $lowStockTone }}">
               <div class="dashboard-metric-title">
                 <span class="dashboard-metric-icon"><i class="bi bi-exclamation-triangle"></i></span>
                 <span class="dashboard-metric-label">Low Stock Products</span>
@@ -223,7 +227,7 @@
                 <strong>{{ $lowStockProducts > 0 ? $lowStockProducts : '-' }}</strong>
               </div>
             </div>
-            <div class="dashboard-metric-row metric-red">
+            <div class="dashboard-metric-row {{ $outOfStockTone }}">
               <div class="dashboard-metric-title">
                 <span class="dashboard-metric-icon"><i class="bi bi-x-circle"></i></span>
                 <span class="dashboard-metric-label">Out of Stock Products</span>

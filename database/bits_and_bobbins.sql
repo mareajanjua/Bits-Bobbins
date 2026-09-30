@@ -11,8 +11,34 @@ CREATE TABLE admin (
     username        VARCHAR(50)  NOT NULL UNIQUE,
     email           VARCHAR(150) NOT NULL UNIQUE,
     password_hash   VARCHAR(255) NOT NULL,
+    profile_photo   VARCHAR(255),
+    shop_name       VARCHAR(150),
+    shop_address    TEXT,
+    notify_returns          BOOLEAN DEFAULT TRUE,
+    notify_failed_payments  BOOLEAN DEFAULT TRUE,
+    notify_low_stock        BOOLEAN DEFAULT TRUE,
     created_at      DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
+
+INSERT INTO admin (
+    username,
+    email,
+    password_hash,
+    shop_name,
+    shop_address,
+    notify_returns,
+    notify_failed_payments,
+    notify_low_stock
+) VALUES (
+    'admin',
+    'admin@email.com',
+    '$2y$10$yHxuvV4/aABm2niHKWSNo.fOByHZpT1Zy6jdX0P6ocOp8VjEFJSqy',
+    'Bits&Bobbins',
+    '',
+    TRUE,
+    TRUE,
+    TRUE
+);
 
 -- ---------- EMPLOYEE (login by email, admin-created, self password change only) ----------
 CREATE TABLE employee (
@@ -21,6 +47,7 @@ CREATE TABLE employee (
     password_hash   VARCHAR(255) NOT NULL,
     full_name       VARCHAR(100) NOT NULL,
     phone           VARCHAR(20),
+    profile_photo   VARCHAR(255),
     status          ENUM('active','inactive') DEFAULT 'active',
     created_by      INT NOT NULL,               -- admin_id
     created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -117,6 +144,11 @@ CREATE TABLE delivery_type (
     delivery_code   CHAR(1) PRIMARY KEY,     -- e.g. '1'=Courier,'2'=VPP,'3'=Registered Post
     delivery_name   VARCHAR(60) NOT NULL
 ) ENGINE=InnoDB;
+
+INSERT INTO delivery_type (delivery_code, delivery_name) VALUES
+('1', 'Courier'),
+('2', 'VPP'),
+('3', 'Registered Post');
 
 -- ---------- ORDER HEADER ----------
 CREATE TABLE orders (
@@ -242,6 +274,7 @@ CREATE TABLE feedback (
     message         TEXT NOT NULL,
     rating          TINYINT CHECK (rating BETWEEN 1 AND 5),
     submitted_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
+    reviewed_at     DATETIME NULL,
     FOREIGN KEY (customer_id) REFERENCES customer(customer_id),
     FOREIGN KEY (order_id) REFERENCES orders(order_id),
     FOREIGN KEY (product_id) REFERENCES product(product_id)

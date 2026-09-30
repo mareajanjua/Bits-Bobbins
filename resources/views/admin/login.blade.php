@@ -28,7 +28,12 @@
         </div>
         <div class="col-12">
           <label class="form-label-custom">Password</label>
-          <input type="password" name="password" class="form-control-custom" required>
+          <div class="login-password-field">
+            <input type="password" name="password" class="form-control-custom login-input-password" required>
+            <button type="button" class="password-toggle-btn" data-password-toggle aria-label="Show password">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
         </div>
         <div class="col-12">
           <button class="btn-custom btn-custom-primary w-100" type="submit">Login</button>
@@ -36,5 +41,19 @@
       </form>
     </div>
   </div>
+  <script>
+    document.querySelectorAll('[data-password-toggle]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const input = button.closest('.login-password-field')?.querySelector('input');
+        const icon = button.querySelector('i');
+        if (!input) return;
+        const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        button.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+        icon?.classList.toggle('bi-eye', !show);
+        icon?.classList.toggle('bi-eye-slash', show);
+      });
+    });
+  </script>
 </body>
 </html>

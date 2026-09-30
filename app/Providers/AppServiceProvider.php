@@ -28,7 +28,9 @@ class AppServiceProvider extends ServiceProvider
     {
         View::composer(['admin.*', 'employee.*'], function ($view) {
             $lowStockThreshold = 5;
-            $notifications = collect([
+            $notifications = session('employee_id')
+                ? collect()
+                : collect([
                 [
                     'label' => 'New orders waiting for review',
                     'count' => DB::table('orders')->where('order_status', 'placed')->count(),
@@ -71,7 +73,7 @@ class AppServiceProvider extends ServiceProvider
                     'url' => route('admin.feedback.index'),
                     'tone' => 'bg-secondary text-white',
                 ],
-            ])->filter(fn ($notification) => $notification['count'] > 0)->values();
+                ])->filter(fn ($notification) => $notification['count'] > 0)->values();
 
             $currentUser = Admin::query()->first();
 

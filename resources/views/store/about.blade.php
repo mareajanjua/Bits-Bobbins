@@ -123,17 +123,17 @@
       <div class="row">
         <div class="col-12">
           <div class="bb-about-contact-grid">
-            <a href="mailto:support@bitsandbobbins.test">
+            <a href="mailto:support@bitsandbobbins.test" target="_blank" rel="noopener">
               <i class="bi bi-envelope"></i>
               <span>Customer Support</span>
               <strong>support@bitsandbobbins.test</strong>
             </a>
-            <a href="mailto:orders@bitsandbobbins.test">
+            <a href="mailto:orders@bitsandbobbins.test" target="_blank" rel="noopener">
               <i class="bi bi-bag-check"></i>
               <span>Orders</span>
               <strong>orders@bitsandbobbins.test</strong>
             </a>
-            <a href="mailto:feedback@bitsandbobbins.test">
+            <a href="mailto:feedback@bitsandbobbins.test" target="_blank" rel="noopener">
               <i class="bi bi-chat-square-heart"></i>
               <span>Feedback</span>
               <strong>feedback@bitsandbobbins.test</strong>
