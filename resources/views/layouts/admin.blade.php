@@ -11,7 +11,7 @@
   <meta name="author" content="SoloDesignStudio">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="{{ asset('assets/dashboard/images/favicon.ico') }}">
+  <link rel="icon" type="image/jpeg" href="{{ asset('assets/bits-bobbins-favicon.jfif') }}">
 
   <!-- Local Third-Party Libraries (100% Offline Compatible) -->
   <link rel="stylesheet" href="{{ asset('assets/dashboard/libs/bootstrap/css/bootstrap.min.css') }}">

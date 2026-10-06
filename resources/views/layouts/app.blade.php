@@ -78,7 +78,7 @@
     <base href="{{ asset('assets/frontend') }}/">
 
     <!-- Favicon -->
-    <link href="{{ asset('assets/dashboard/images/favicon.ico') }}" rel="icon">
+    <link href="{{ asset('assets/bits-bobbins-favicon.jfif') }}" rel="icon" type="image/jpeg">
 
     <!-- Google Web Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

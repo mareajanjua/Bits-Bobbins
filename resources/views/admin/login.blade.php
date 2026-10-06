@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Login</title>
+  <link rel="icon" type="image/jpeg" href="{{ asset('assets/bits-bobbins-favicon.jfif') }}">
   <link rel="stylesheet" href="{{ asset('assets/dashboard/libs/bootstrap/css/bootstrap.min.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/dashboard/libs/bootstrap-icons/bootstrap-icons.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/dashboard/css/main.css') }}">
